@@ -35,15 +35,15 @@ abstract final class AppTypography {
     color: AppColors.navy,
   );
   static const heading05 = TextStyle(
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: FontWeight.w700,
-    height: lineHeight,
+    height: 1.25,
     color: AppColors.navy,
   );
   static const heading06 = TextStyle(
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: FontWeight.w600,
-    height: lineHeight,
+    height: 1.3,
     color: AppColors.navy,
   );
   static const body = TextStyle(
@@ -59,25 +59,24 @@ abstract final class AppTypography {
     color: AppColors.navy,
   );
   static const caption = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w200,
-    fontStyle: FontStyle.italic,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
     height: lineHeight,
     color: AppColors.slate,
   );
   static const primaryButton = TextStyle(
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: FontWeight.w700,
     height: lineHeight,
   );
   static const secondaryButton = TextStyle(
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: FontWeight.w400,
     height: lineHeight,
   );
   static const smallButton = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w400,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
     height: lineHeight,
   );
 
@@ -89,6 +88,12 @@ abstract final class AppTypography {
     headlineSmall: heading06,
     titleLarge: heading05,
     titleMedium: bodyStrong,
+    titleSmall: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: lineHeight,
+      color: AppColors.navy,
+    ),
     bodyLarge: body,
     bodyMedium: TextStyle(
       fontSize: 16,
@@ -98,5 +103,7 @@ abstract final class AppTypography {
     ),
     labelLarge: primaryButton,
     labelMedium: smallButton,
+    labelSmall: smallButton,
+    bodySmall: caption,
   );
 }

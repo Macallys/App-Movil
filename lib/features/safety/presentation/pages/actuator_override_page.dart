@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/actuator_state.dart';
 import '../providers/safety_providers.dart';
 import '../safety_labels.dart';
+import '../widgets/safety_visuals.dart';
 
 class ActuatorOverrideTarget {
   const ActuatorOverrideTarget({
@@ -39,11 +40,18 @@ class ActuatorOverridePage extends ConsumerWidget {
     };
     final submitting = state is ActuatorOverrideSubmitting;
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       children: [
-        Text(
-          'Control manual',
-          style: Theme.of(context).textTheme.headlineSmall,
+        SafetyIconLine(
+          icon: Icons.tune,
+          color: AppColors.blue,
+          child: Text(
+            'Control manual',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         Card(
@@ -52,13 +60,35 @@ class ActuatorOverridePage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Área: ${target.areaName}'),
+                SafetyIconLine(
+                  icon: Icons.location_on_outlined,
+                  child: Text(
+                    'Área: ${target.areaName}',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(actuatorTypeLabel(shown.type)),
+                SafetyIconLine(
+                  icon: actuatorVisualIcon(shown.type),
+                  color: AppColors.blue,
+                  child: Text(
+                    actuatorTypeLabel(shown.type),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Text('Estado actual: ${runStateLabel(shown.runState)}'),
+                SafetyStatusChip(
+                  icon: actuatorStateVisualIcon(shown.runState),
+                  color: actuatorStateVisualColor(shown.runState),
+                  child: Text(
+                    'Estado actual: ${runStateLabel(shown.runState)}',
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Text('Modo: ${modeLabel(shown.mode)}'),
+                SafetyIconLine(
+                  icon: Icons.settings_outlined,
+                  child: Text('Modo: ${modeLabel(shown.mode)}'),
+                ),
               ],
             ),
           ),
@@ -68,6 +98,7 @@ class ActuatorOverridePage extends ConsumerWidget {
         for (final command in _commands(shown.type)) ...[
           const SizedBox(height: AppSpacing.md),
           OutlinedButton(
+            style: OutlinedButton.styleFrom(backgroundColor: AppColors.white),
             onPressed: submitting || command.state == shown.runState
                 ? null
                 : () => _confirm(context, ref, command),
@@ -156,9 +187,10 @@ class _Feedback extends StatelessWidget {
         state is ActuatorOverrideFailure;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Text(
-        message,
-        style: TextStyle(color: failed ? AppColors.red : AppColors.green),
+      child: SafetyIconLine(
+        icon: failed ? Icons.error_outline : Icons.check_circle_outline,
+        color: failed ? AppColors.red : AppColors.green,
+        child: Text(message, style: const TextStyle(color: AppColors.navy)),
       ),
     );
   }

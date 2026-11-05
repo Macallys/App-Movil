@@ -15,34 +15,52 @@ class BootstrapPage extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: failed
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'No se pudo iniciar la aplicación.',
-                      style: textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    FilledButton(
-                      onPressed: () {
-                        ref
-                            .read(sessionControllerProvider.notifier)
-                            .restoreSession();
-                      },
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: AppSpacing.md),
-                    Text('SafePlant', style: textTheme.titleLarge),
-                  ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 448),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: failed
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'No se pudo iniciar la aplicación.',
+                                style: textTheme.bodyLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              FilledButton(
+                                onPressed: () {
+                                  ref
+                                      .read(sessionControllerProvider.notifier)
+                                      .restoreSession();
+                                },
+                                child: const Text('Reintentar'),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                'SafePlant',
+                                style: textTheme.titleMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
+              ),
+            ),
+          ),
         ),
       ),
     );

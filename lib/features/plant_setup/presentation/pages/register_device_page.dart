@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/shared/widgets/safeplant_button_progress.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../widgets/plant_setup_visuals.dart';
 import '../../domain/entities/area_setup.dart';
 import '../../domain/entities/device_association.dart';
 import '../providers/plant_setup_providers.dart';
@@ -140,78 +141,98 @@ class _RegisterDeviceForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final errorColor = AppColors.red;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Registrar dispositivo',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Área', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            Text(areaId),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: deviceIdController,
-              decoration: const InputDecoration(labelText: 'Identificador'),
-              textInputAction: TextInputAction.done,
-              enabled: !busy,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'El identificador es obligatorio';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Tipo', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            SegmentedButton<DeviceKind>(
-              emptySelectionAllowed: true,
-              selected: {?kind},
-              onSelectionChanged: onKindChanged == null
-                  ? null
-                  : (selection) {
-                      if (selection.isEmpty) {
-                        return;
-                      }
-                      onKindChanged!(selection.first);
-                    },
-              segments: const [
-                ButtonSegment(value: DeviceKind.sensor, label: Text('Sensor')),
-                ButtonSegment(
-                  value: DeviceKind.actuator,
-                  label: Text('Actuador'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
+      child: PlantSetupCard(
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PlantSetupIconLine(
+                icon: Icons.devices_outlined,
+                child: Text(
+                  'Registrar dispositivo',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Área', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              Text(areaId),
+              const SizedBox(height: AppSpacing.md),
+              TextFormField(
+                controller: deviceIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Identificador',
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  fillColor: AppColors.ice,
+                ),
+                textInputAction: TextInputAction.done,
+                enabled: !busy,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El identificador es obligatorio';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text('Tipo', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              SegmentedButton<DeviceKind>(
+                style: SegmentedButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  textStyle: const TextStyle(fontSize: 14),
+                ),
+                emptySelectionAllowed: true,
+                selected: {?kind},
+                onSelectionChanged: onKindChanged == null
+                    ? null
+                    : (selection) {
+                        if (selection.isEmpty) {
+                          return;
+                        }
+                        onKindChanged!(selection.first);
+                      },
+                segments: const [
+                  ButtonSegment(
+                    value: DeviceKind.sensor,
+                    label: Text('Sensor'),
+                  ),
+                  ButtonSegment(
+                    value: DeviceKind.actuator,
+                    label: Text('Actuador'),
+                  ),
+                ],
+              ),
+              if (kind == null && kindMissing) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'El tipo es obligatorio',
+                  style: TextStyle(color: errorColor),
                 ),
               ],
-            ),
-            if (kind == null && kindMissing) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'El tipo es obligatorio',
-                style: TextStyle(color: errorColor),
+              if (progress != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(progress!),
+              ],
+              if (message != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(message!, style: TextStyle(color: errorColor)),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                onPressed: onSubmit,
+                child: busy
+                    ? const SafePlantButtonProgress()
+                    : const Text('Registrar dispositivo'),
               ),
             ],
-            if (progress != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(progress!),
-            ],
-            if (message != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(message!, style: TextStyle(color: errorColor)),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: onSubmit,
-              child: busy
-                  ? const SafePlantButtonProgress()
-                  : const Text('Registrar dispositivo'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -230,11 +251,17 @@ class _RegisteredDevice extends StatelessWidget {
       DeviceKind.actuator => 'Actuador',
     };
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       children: [
-        Text(
-          'Dispositivo registrado',
-          style: Theme.of(context).textTheme.headlineSmall,
+        PlantSetupIconLine(
+          icon: Icons.check_circle_outline,
+          child: Text(
+            'Dispositivo registrado',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(association.deviceId),
@@ -259,11 +286,17 @@ class _AssociationPending extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       children: [
-        Text(
-          'El dispositivo fue registrado, pero no pudo asociarse al área.',
-          style: Theme.of(context).textTheme.bodyLarge,
+        PlantSetupIconLine(
+          icon: Icons.info_outline,
+          child: Text(
+            'El dispositivo fue registrado, pero no pudo asociarse al área.',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
         if (retrying) ...[
           const SizedBox(height: AppSpacing.md),

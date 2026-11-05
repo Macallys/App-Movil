@@ -51,49 +51,68 @@ class _RecoveryPageState extends ConsumerState<RecoveryPage> {
       appBar: AppBar(title: const Text('Recuperar acceso')),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Correo'),
-                  keyboardType: TextInputType.emailAddress,
-                  enabled: !loading,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'El correo es obligatorio';
-                    }
-                    return null;
-                  },
-                ),
-                if (message != null) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    message,
-                    style: TextStyle(
-                      color: isError ? AppColors.red : AppColors.navy,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.lg,
+          ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 448),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: _emailController,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration: const InputDecoration(
+                            labelText: 'Correo',
+                            prefixIcon: Icon(Icons.alternate_email),
+                            fillColor: AppColors.ice,
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          enabled: !loading,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'El correo es obligatorio';
+                            }
+                            return null;
+                          },
+                        ),
+                        if (message != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            message,
+                            style: TextStyle(
+                              color: isError ? AppColors.red : AppColors.navy,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: AppSpacing.lg),
+                        FilledButton(
+                          key: const Key('recoverySubmitButton'),
+                          onPressed: loading ? null : _submit,
+                          child: loading
+                              ? const SafePlantButtonProgress()
+                              : const Text('Recuperar acceso'),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextButton(
+                          onPressed: () {
+                            context.push(RouteNames.reset);
+                          },
+                          child: const Text('Ya tengo un código'),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  key: const Key('recoverySubmitButton'),
-                  onPressed: loading ? null : _submit,
-                  child: loading
-                      ? const SafePlantButtonProgress()
-                      : const Text('Recuperar acceso'),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton(
-                  onPressed: () {
-                    context.push(RouteNames.reset);
-                  },
-                  child: const Text('Ya tengo un código'),
-                ),
-              ],
+              ),
             ),
           ),
         ),

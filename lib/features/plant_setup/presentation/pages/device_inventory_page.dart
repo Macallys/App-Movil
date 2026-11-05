@@ -5,6 +5,7 @@ import '../../domain/entities/device.dart';
 import '../../../../core/shared/widgets/safeplant_status_view.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../widgets/plant_setup_visuals.dart';
 import '../providers/plant_setup_providers.dart';
 import '../widgets/device_card.dart';
 
@@ -124,16 +125,22 @@ class _InventoryList extends StatelessWidget {
       null => null,
     };
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       itemCount: state.devices.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Inventario de dispositivos',
-                style: Theme.of(context).textTheme.headlineSmall,
+              PlantSetupIconLine(
+                icon: Icons.devices_outlined,
+                child: Text(
+                  'Inventario de dispositivos',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
               if (feedback != null) ...[
                 const SizedBox(height: AppSpacing.md),

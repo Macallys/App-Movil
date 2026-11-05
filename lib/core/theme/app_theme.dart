@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_radius.dart';
+import 'app_spacing.dart';
 import 'app_typography.dart';
 
 /// Light theme assembled from the SAFEPLANT style guide.
@@ -29,6 +30,13 @@ abstract final class AppTheme {
       errorContainer: AppColors.red,
       onErrorContainer: AppColors.white,
       surface: AppColors.white,
+      surfaceDim: AppColors.ice,
+      surfaceBright: AppColors.white,
+      surfaceContainerLowest: AppColors.white,
+      surfaceContainerLow: AppColors.canvas,
+      surfaceContainer: AppColors.ice,
+      surfaceContainerHigh: AppColors.lightBlue,
+      surfaceContainerHighest: AppColors.lightBlue,
       onSurface: AppColors.navy,
       onSurfaceVariant: AppColors.slate,
       outline: AppColors.slate,
@@ -50,11 +58,14 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: AppColors.canvas,
       textTheme: AppTypography.textTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.navy,
-        foregroundColor: AppColors.white,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.navy,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: AppColors.white,
+        titleSpacing: AppSpacing.md,
         titleTextStyle: TextStyle(
-          color: AppColors.white,
+          color: AppColors.navy,
           fontSize: 20,
           fontWeight: FontWeight.w600,
           height: AppTypography.lineHeight,
@@ -72,6 +83,10 @@ abstract final class AppTheme {
             height: AppTypography.lineHeight,
           ),
           minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           elevation: 0,
           shape: shape,
         ),
@@ -85,6 +100,10 @@ abstract final class AppTheme {
             height: AppTypography.lineHeight,
           ),
           minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           side: const BorderSide(color: AppColors.navy),
           shape: shape,
         ),
@@ -98,11 +117,24 @@ abstract final class AppTheme {
             height: AppTypography.lineHeight,
           ),
           minimumSize: const Size(48, 48),
+          shape: shape,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          foregroundColor: AppColors.navy,
+          shape: shape,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: AppColors.canvas,
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
+        constraints: const BoxConstraints(minHeight: 48),
+        prefixIconColor: AppColors.slate,
+        suffixIconColor: AppColors.slate,
+        errorMaxLines: 3,
         hintStyle: const TextStyle(color: AppColors.slate),
         labelStyle: const TextStyle(color: AppColors.navy),
         border: OutlineInputBorder(
@@ -129,15 +161,31 @@ abstract final class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.white,
         elevation: 0,
-        shape: shape,
+        surfaceTintColor: AppColors.white,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          side: const BorderSide(color: AppColors.lightBlue),
+        ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.white,
+        elevation: 0,
+        surfaceTintColor: AppColors.white,
         shape: shape,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.white,
+        elevation: 0,
+        surfaceTintColor: AppColors.white,
         indicatorColor: AppColors.lightBlue,
+        indicatorShape: shape,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return AppTypography.smallButton.copyWith(
+            color: selected ? AppColors.navy : AppColors.slate,
+          );
+        }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(

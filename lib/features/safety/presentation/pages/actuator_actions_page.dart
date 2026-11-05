@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/safety_providers.dart';
 import '../widgets/actuator_action_list_item.dart';
+import '../widgets/safety_visuals.dart';
 
 class ActuatorActionsPage extends ConsumerStatefulWidget {
   const ActuatorActionsPage({required this.areaId, super.key});
@@ -96,16 +97,23 @@ class _ActionsList extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         itemCount: actions.isEmpty ? 2 : actions.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Actividad de actuadores',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                SafetyIconLine(
+                  icon: Icons.history_toggle_off,
+                  color: AppColors.blue,
+                  child: Text(
+                    'Actividad de actuadores',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
                 if (refreshError) ...[
                   const SizedBox(height: AppSpacing.md),

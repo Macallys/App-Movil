@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/safety_providers.dart';
 import '../widgets/exposure_list_item.dart';
+import '../widgets/safety_visuals.dart';
 
 class ShortExposureHistoryPage extends ConsumerStatefulWidget {
   const ShortExposureHistoryPage({required this.areaId, super.key});
@@ -98,16 +99,23 @@ class _HistoryList extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         itemCount: exposures.isEmpty ? 2 : exposures.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Exposición reciente',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                SafetyIconLine(
+                  icon: Icons.history,
+                  color: AppColors.blue,
+                  child: Text(
+                    'Exposición reciente',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
                 if (refreshError) ...[
                   const SizedBox(height: AppSpacing.md),

@@ -11,6 +11,7 @@ import '../../domain/entities/latest_readings.dart';
 import '../providers/safety_providers.dart';
 import '../safety_labels.dart';
 import '../widgets/severity_label.dart';
+import '../widgets/safety_visuals.dart';
 import 'actuator_override_page.dart';
 
 class SafetyAreaDetailPage extends ConsumerStatefulWidget {
@@ -57,21 +58,48 @@ class _SafetyAreaDetailPageState extends ConsumerState<SafetyAreaDetailPage> {
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(area.name, style: Theme.of(context).textTheme.headlineSmall),
+            SafetyIconLine(
+              icon: Icons.factory_outlined,
+              color: AppColors.blue,
+              child: Text(
+                area.name,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
             if (area.highlighted) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text('Destacada', style: TextStyle(color: scheme.primary)),
+              SafetyStatusChip(
+                icon: Icons.star_outline,
+                color: AppColors.blue,
+                child: Text(
+                  'Destacada',
+                  style: TextStyle(color: scheme.primary),
+                ),
+              ),
             ],
             const SizedBox(height: AppSpacing.md),
-            Text('CO₂: ${measureLabel(area.co2Ppm, 'ppm')}'),
+            SafetyMetricPair(
+              first: SafetyMetricTile(
+                icon: Icons.air,
+                child: Text('CO₂: ${measureLabel(area.co2Ppm, 'ppm')}'),
+              ),
+              second: SafetyMetricTile(
+                icon: Icons.graphic_eq,
+                child: Text('Ruido: ${measureLabel(area.noiseDb, 'dB')}'),
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            Text('Ruido: ${measureLabel(area.noiseDb, 'dB')}'),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Presencia: ${presenceLabel(area.presenceState)}'),
+            SafetyIconLine(
+              icon: Icons.person_outline,
+              child: Text('Presencia: ${presenceLabel(area.presenceState)}'),
+            ),
             const SizedBox(height: AppSpacing.sm),
             SeverityLabel(severity: area.severity),
             const SizedBox(height: AppSpacing.sm),
@@ -135,13 +163,37 @@ class _SafetyAreaDetailPageState extends ConsumerState<SafetyAreaDetailPage> {
               const Text('Sin actuadores')
             else
               for (final actuator in _actuators) ...[
-                Text(actuatorSummary(actuator)),
-                Text('Cambio: ${formatStatusDate(actuator.lastChangedAt)}'),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => _openOverride(area, actuator),
-                    child: const Text('Control manual'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SafetyIconLine(
+                          icon: actuatorStateVisualIcon(actuator.runState),
+                          color: actuatorStateVisualColor(actuator.runState),
+                          child: Text(
+                            actuatorSummary(actuator),
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        SafetyIconLine(
+                          icon: Icons.schedule,
+                          child: Text(
+                            'Cambio: ${formatStatusDate(actuator.lastChangedAt)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: () => _openOverride(area, actuator),
+                            child: const Text('Control manual'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -308,16 +360,32 @@ class _ReadingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            SafetyIconLine(
+              icon: Icons.sensors,
+              color: AppColors.blue,
+              child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            Text(value ?? 'Sin lectura reciente'),
+            Text(
+              value ?? 'Sin lectura reciente',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             if (deviceId != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text('Dispositivo: $deviceId'),
+              Text(
+                'Dispositivo: $deviceId',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
             if (recordedAt != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(formatStatusDate(recordedAt!)),
+              SafetyIconLine(
+                icon: Icons.schedule,
+                child: Text(
+                  formatStatusDate(recordedAt!),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
             ],
           ],
         ),

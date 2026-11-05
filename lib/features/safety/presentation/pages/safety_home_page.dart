@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/safety_providers.dart';
 import '../widgets/area_operational_status_card.dart';
+import '../widgets/safety_visuals.dart';
 import 'safety_area_detail_page.dart';
 
 class SafetyHomePage extends ConsumerStatefulWidget {
@@ -60,7 +61,10 @@ class _SafetyHomePageState extends ConsumerState<SafetyHomePage> {
                 },
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.lg,
+                  ),
                   children: const [
                     _DashboardHeading(alertCount: 0, areaCount: 0),
                     SizedBox(height: AppSpacing.lg),
@@ -98,7 +102,10 @@ class _SafetyHomePageState extends ConsumerState<SafetyHomePage> {
                   },
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.lg,
+                    ),
                     itemCount: areas.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -157,13 +164,26 @@ class _DashboardHeading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Estado operativo',
-          style: Theme.of(context).textTheme.headlineSmall,
+        SafetyIconLine(
+          icon: Icons.health_and_safety_outlined,
+          color: AppColors.blue,
+          child: Text(
+            'Estado operativo',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(alertCount > 0 ? 'Hay alertas activas' : 'Sin alertas activas'),
-        Text('Áreas: $areaCount'),
+        SafetyIconLine(
+          icon: alertCount > 0
+              ? Icons.campaign_outlined
+              : Icons.check_circle_outline,
+          color: alertCount > 0 ? AppColors.red : AppColors.green,
+          child: Text(
+            alertCount > 0 ? 'Hay alertas activas' : 'Sin alertas activas',
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text('Áreas: $areaCount', style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

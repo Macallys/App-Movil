@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared/widgets/safeplant_button_progress.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'plant_setup_visuals.dart';
 import '../../domain/entities/area_setup.dart';
 import '../../domain/entities/device.dart';
 
@@ -29,20 +30,40 @@ class DeviceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(device.deviceId, style: theme.textTheme.titleMedium),
+            PlantSetupIconLine(
+              icon: Icons.devices_outlined,
+              child: Text(device.deviceId, style: theme.textTheme.titleMedium),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            Text(_kindLabel(device.kind)),
+            PlantSetupIconLine(
+              icon: Icons.settings_input_component,
+              child: Text(_kindLabel(device.kind)),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text('Área: ${device.areaId ?? 'Sin área'}'),
             const SizedBox(height: AppSpacing.sm),
-            Text('Emitido: ${_format(device.issuedAt)}'),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Vence: ${_format(device.expiresAt)}'),
+            Text(
+              'Emitido: ${_format(device.issuedAt)}',
+              style: theme.textTheme.bodySmall,
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              _status(device, now),
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: _statusColor(device, now),
+              'Vence: ${_format(device.expiresAt)}',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            PlantSetupStatusChip(
+              icon: device.revokedAt != null
+                  ? Icons.block
+                  : !device.expiresAt.isAfter(now)
+                  ? Icons.schedule
+                  : Icons.check_circle_outline,
+              color: _statusColor(device, now),
+              child: Text(
+                _status(device, now),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: AppColors.navy,
+                ),
               ),
             ),
             if (device.revokedAt == null) ...[

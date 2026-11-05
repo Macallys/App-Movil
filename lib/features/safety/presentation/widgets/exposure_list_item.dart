@@ -4,6 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/exposure.dart';
 import '../safety_labels.dart';
 import 'severity_label.dart';
+import 'safety_visuals.dart';
 
 class ExposureListItem extends StatelessWidget {
   const ExposureListItem({required this.exposure, super.key});
@@ -18,11 +19,23 @@ class ExposureListItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Área: ${exposure.areaId}'),
+            SafetyIconLine(
+              icon: Icons.location_on_outlined,
+              child: Text(
+                'Área: ${exposure.areaId}',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             SeverityLabel(severity: exposure.severity),
             const SizedBox(height: AppSpacing.sm),
-            Text(formatStatusDate(exposure.recordedAt)),
+            SafetyIconLine(
+              icon: Icons.schedule,
+              child: Text(
+                formatStatusDate(exposure.recordedAt),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           ],
         ),
       ),

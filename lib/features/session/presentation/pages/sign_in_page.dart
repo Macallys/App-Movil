@@ -67,122 +67,141 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
+              horizontal: AppSpacing.md,
               vertical: AppSpacing.xl,
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const _BrandMark(),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'MONITOREO INDUSTRIAL',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: AppColors.blue,
-                      fontWeight: FontWeight.w600,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 448),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const _BrandMark(),
+                    const SizedBox(height: AppSpacing.xl),
+                    Text(
+                      'MONITOREO INDUSTRIAL',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: AppColors.blue,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Tu planta segura,\nestés donde estés.',
-                    style: textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Ingresa a SafePlant con tus credenciales de equipo.',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.slate,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    const SizedBox(height: AppSpacing.sm),
+                    Text.rich(
+                      const TextSpan(
                         children: [
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: const InputDecoration(
-                              labelText: 'Correo corporativo',
-                              hintText: 'tu.nombre@empresa.com',
-                              prefixIcon: Icon(Icons.alternate_email),
+                          TextSpan(text: 'Tu planta segura,\n'),
+                          TextSpan(
+                            text: 'estés donde estés.',
+                            style: TextStyle(
+                              color: AppColors.slate,
+                              fontWeight: FontWeight.w500,
                             ),
-                            keyboardType: TextInputType.emailAddress,
-                            autofillHints: const [AutofillHints.email],
-                            textInputAction: TextInputAction.next,
-                            enabled: !loading,
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'El correo es obligatorio';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          TextFormField(
-                            controller: _passwordController,
-                            decoration: InputDecoration(
-                              labelText: 'Contraseña',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                tooltip: _obscurePassword
-                                    ? 'Mostrar contraseña'
-                                    : 'Ocultar contraseña',
-                                onPressed: loading
-                                    ? null
-                                    : () {
-                                        setState(() {
-                                          _obscurePassword = !_obscurePassword;
-                                        });
-                                      },
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                ),
-                              ),
-                            ),
-                            obscureText: _obscurePassword,
-                            autofillHints: const [AutofillHints.password],
-                            enabled: !loading,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'La contraseña es obligatoria';
-                              }
-                              return null;
-                            },
-                          ),
-                          if (message != null) ...[
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              message,
-                              style: TextStyle(color: messageColor),
-                            ),
-                          ],
-                          const SizedBox(height: AppSpacing.lg),
-                          FilledButton(
-                            onPressed: loading ? null : _submit,
-                            child: loading
-                                ? const SafePlantButtonProgress()
-                                : const Text('Iniciar sesión'),
                           ),
                         ],
                       ),
+                      style: textTheme.titleLarge,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextButton(
-                    onPressed: loading
-                        ? null
-                        : () {
-                            context.push(RouteNames.recovery);
-                          },
-                    child: const Text('¿Olvidaste tu contraseña?'),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Ingresa a SafePlant con tus credenciales de equipo.',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.slate,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextFormField(
+                              controller: _emailController,
+                              style: textTheme.bodyMedium,
+                              decoration: const InputDecoration(
+                                labelText: 'Correo corporativo',
+                                hintText: 'tu.nombre@empresa.com',
+                                hintMaxLines: 2,
+                                prefixIcon: Icon(Icons.alternate_email),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [AutofillHints.email],
+                              textInputAction: TextInputAction.next,
+                              enabled: !loading,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'El correo es obligatorio';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            TextFormField(
+                              controller: _passwordController,
+                              style: textTheme.bodyMedium,
+                              decoration: InputDecoration(
+                                labelText: 'Contraseña',
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  tooltip: _obscurePassword
+                                      ? 'Mostrar contraseña'
+                                      : 'Ocultar contraseña',
+                                  onPressed: loading
+                                      ? null
+                                      : () {
+                                          setState(() {
+                                            _obscurePassword =
+                                                !_obscurePassword;
+                                          });
+                                        },
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
+                                ),
+                              ),
+                              obscureText: _obscurePassword,
+                              autofillHints: const [AutofillHints.password],
+                              enabled: !loading,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'La contraseña es obligatoria';
+                                }
+                                return null;
+                              },
+                            ),
+                            if (message != null) ...[
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                message,
+                                style: TextStyle(color: messageColor),
+                              ),
+                            ],
+                            const SizedBox(height: AppSpacing.lg),
+                            FilledButton(
+                              onPressed: loading ? null : _submit,
+                              child: loading
+                                  ? const SafePlantButtonProgress()
+                                  : const Text('Iniciar sesión'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              context.push(RouteNames.recovery);
+                            },
+                      child: const Text('¿Olvidaste tu contraseña?'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -207,22 +226,19 @@ class _BrandMark extends StatelessWidget {
           child: const SizedBox(
             width: 48,
             height: 48,
-            child: Icon(Icons.shield_outlined, color: AppColors.white),
+            child: Icon(Icons.shield_outlined, color: AppColors.cyan),
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'SafePlant',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              Text('SafePlant', style: Theme.of(context).textTheme.titleMedium),
               Text(
                 'BY MACALLYS',
                 style: Theme.of(context).textTheme.labelMedium
-                    ?.copyWith(color: AppColors.slate),
+                    ?.copyWith(color: AppColors.blue, letterSpacing: 0.5),
               ),
             ],
           ),

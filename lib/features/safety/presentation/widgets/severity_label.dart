@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/area_operational_status.dart';
 import '../safety_labels.dart';
+import 'safety_visuals.dart';
 
 /// Severity is named and iconed. Color reinforces the label.
 class SeverityLabel extends StatelessWidget {
@@ -18,18 +18,10 @@ class SeverityLabel extends StatelessWidget {
       ExposureSeverity.medium => Icons.warning_amber_outlined,
       ExposureSeverity.high => Icons.error_outline,
     };
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            'Severidad: ${severityLabel(severity)}',
-            style: TextStyle(color: color),
-          ),
-        ),
-      ],
+    return SafetyStatusChip(
+      icon: icon,
+      color: color,
+      child: Text('Severidad: ${severityLabel(severity)}'),
     );
   }
 }

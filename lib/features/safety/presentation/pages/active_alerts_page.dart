@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/environmental_alert.dart';
 import '../providers/safety_providers.dart';
 import '../widgets/environmental_alert_card.dart';
+import '../widgets/safety_visuals.dart';
 
 class ActiveAlertsPage extends ConsumerStatefulWidget {
   const ActiveAlertsPage({this.areaId, super.key});
@@ -120,16 +121,23 @@ class _AlertsList extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         itemCount: alerts.isEmpty ? 2 : alerts.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Alertas activas',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                SafetyIconLine(
+                  icon: Icons.notifications_active_outlined,
+                  color: AppColors.blue,
+                  child: Text(
+                    'Alertas activas',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
                 if (refreshError) ...[
                   const SizedBox(height: AppSpacing.md),

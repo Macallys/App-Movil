@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/shared/widgets/safeplant_button_progress.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../widgets/plant_setup_visuals.dart';
 import '../../../../app/router/route_names.dart';
 import '../providers/plant_setup_providers.dart';
 
@@ -53,65 +54,85 @@ class _CreateAreaPageState extends ConsumerState<CreateAreaPage> {
     };
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       child: created == null
-          ? Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Nueva área',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre del área',
+          ? PlantSetupCard(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PlantSetupIconLine(
+                      icon: Icons.factory_outlined,
+                      child: Text(
+                        'Nueva área',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
-                    textInputAction: TextInputAction.next,
-                    enabled: !loading,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'El nombre es obligatorio';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _locationController,
-                    decoration: const InputDecoration(labelText: 'Ubicación'),
-                    textInputAction: TextInputAction.done,
-                    enabled: !loading,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'La ubicación es obligatoria';
-                      }
-                      return null;
-                    },
-                  ),
-                  if (message != null) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre del área',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        fillColor: AppColors.ice,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      enabled: !loading,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'El nombre es obligatorio';
+                        }
+                        return null;
+                      },
+                    ),
                     const SizedBox(height: AppSpacing.md),
-                    Text(message, style: const TextStyle(color: AppColors.red)),
+                    TextFormField(
+                      controller: _locationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Ubicación',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        fillColor: AppColors.ice,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      enabled: !loading,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'La ubicación es obligatoria';
+                        }
+                        return null;
+                      },
+                    ),
+                    if (message != null) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        message,
+                        style: const TextStyle(color: AppColors.red),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.lg),
+                    FilledButton(
+                      onPressed: loading ? null : _submit,
+                      child: loading
+                          ? const SafePlantButtonProgress()
+                          : const Text('Crear área'),
+                    ),
                   ],
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    onPressed: loading ? null : _submit,
-                    child: loading
-                        ? const SafePlantButtonProgress()
-                        : const Text('Crear área'),
-                  ),
-                ],
+                ),
               ),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Área creada',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                PlantSetupIconLine(
+                  icon: Icons.check_circle_outline,
+                  child: Text(
+                    'Área creada',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(created.name),

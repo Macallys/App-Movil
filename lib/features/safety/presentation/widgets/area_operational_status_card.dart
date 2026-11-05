@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/area_operational_status.dart';
 import '../safety_labels.dart';
 import 'severity_label.dart';
+import 'safety_visuals.dart';
 
 class AreaOperationalStatusCard extends StatelessWidget {
   const AreaOperationalStatusCard({
@@ -38,15 +39,40 @@ class AreaOperationalStatusCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(status.name, style: theme.textTheme.titleMedium),
+              SafetyIconLine(
+                icon: Icons.factory_outlined,
+                color: AppColors.blue,
+                child: Text(status.name, style: theme.textTheme.titleMedium),
+              ),
               if (status.highlighted) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Text('Destacada', style: TextStyle(color: scheme.primary)),
+                SafetyStatusChip(
+                  icon: Icons.star_outline,
+                  color: AppColors.blue,
+                  child: Text(
+                    'Destacada',
+                    style: TextStyle(color: scheme.primary),
+                  ),
+                ),
               ],
               const SizedBox(height: AppSpacing.sm),
-              Text('CO₂: ${measureLabel(status.co2Ppm, 'ppm')}'),
-              Text('Ruido: ${measureLabel(status.noiseDb, 'dB')}'),
-              Text('Presencia: ${presenceLabel(status.presenceState)}'),
+              SafetyMetricPair(
+                first: SafetyMetricTile(
+                  icon: Icons.air,
+                  child: Text('CO₂: ${measureLabel(status.co2Ppm, 'ppm')}'),
+                ),
+                second: SafetyMetricTile(
+                  icon: Icons.graphic_eq,
+                  child: Text('Ruido: ${measureLabel(status.noiseDb, 'dB')}'),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              SafetyIconLine(
+                icon: Icons.person_outline,
+                child: Text(
+                  'Presencia: ${presenceLabel(status.presenceState)}',
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               SeverityLabel(severity: status.severity),
               if (status.alertActive) ...[
@@ -71,7 +97,14 @@ class AreaOperationalStatusCard extends StatelessWidget {
               if (status.actuators.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.md),
                 for (final actuator in status.actuators)
-                  Text(actuatorSummary(actuator)),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: SafetyIconLine(
+                      icon: actuatorStateVisualIcon(actuator.runState),
+                      color: actuatorStateVisualColor(actuator.runState),
+                      child: Text(actuatorSummary(actuator)),
+                    ),
+                  ),
               ],
             ],
           ),

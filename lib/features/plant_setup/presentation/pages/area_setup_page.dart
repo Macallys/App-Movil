@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../widgets/plant_setup_visuals.dart';
 import '../../domain/entities/area_setup.dart';
 import '../providers/plant_setup_providers.dart';
 
@@ -63,19 +64,45 @@ class _AreaSetupBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       children: [
-        Text(setup.name, style: textTheme.headlineSmall),
+        PlantSetupIconLine(
+          icon: Icons.factory_outlined,
+          child: Text(setup.name, style: textTheme.headlineSmall),
+        ),
         const SizedBox(height: AppSpacing.sm),
-        Text(setup.location, style: textTheme.bodyLarge),
+        Text(setup.location, style: textTheme.bodyMedium),
         const SizedBox(height: AppSpacing.lg),
-        Text('Límite de CO₂', style: textTheme.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        Text(_co2(setup.co2LimitPpm)),
+        PlantSetupCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PlantSetupIconLine(
+                icon: Icons.co2,
+                child: Text('Límite de CO₂', style: textTheme.titleSmall),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(_co2(setup.co2LimitPpm), style: textTheme.bodyMedium),
+            ],
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
-        Text('Límite de ruido', style: textTheme.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        Text(_noise(setup.noiseLimitDb)),
+        PlantSetupCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PlantSetupIconLine(
+                icon: Icons.volume_up_outlined,
+                child: Text('Límite de ruido', style: textTheme.titleSmall),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(_noise(setup.noiseLimitDb), style: textTheme.bodyMedium),
+            ],
+          ),
+        ),
         const SizedBox(height: AppSpacing.lg),
         FilledButton(
           onPressed: () {
@@ -105,7 +132,16 @@ class _AreaSetupBody extends StatelessWidget {
           ...setup.devices.map(
             (device) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Text('${device.deviceId} · ${_kindLabel(device.kind)}'),
+              child: PlantSetupCard(
+                child: PlantSetupIconLine(
+                  icon: device.kind == DeviceKind.sensor
+                      ? Icons.sensors
+                      : Icons.settings_input_component,
+                  child: Text(
+                    '${device.deviceId} · ${_kindLabel(device.kind)}',
+                  ),
+                ),
+              ),
             ),
           ),
       ],
@@ -144,7 +180,10 @@ class _AreaSetupMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

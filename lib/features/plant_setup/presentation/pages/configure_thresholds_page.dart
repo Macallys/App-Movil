@@ -6,6 +6,7 @@ import '../../domain/entities/area_thresholds.dart';
 import '../../../../core/shared/widgets/safeplant_button_progress.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../widgets/plant_setup_visuals.dart';
 import '../providers/plant_setup_providers.dart';
 
 class ConfigureThresholdsPage extends ConsumerStatefulWidget {
@@ -88,43 +89,64 @@ class _ConfigureThresholdsPageState
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Configurar umbrales',
-              style: Theme.of(context).textTheme.headlineSmall,
+            PlantSetupIconLine(
+              icon: Icons.tune,
+              child: Text(
+                'Configurar umbrales',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            TextFormField(
-              controller: _co2Controller,
-              decoration: const InputDecoration(
-                labelText: 'Límite de CO₂ (ppm)',
+            PlantSetupCard(
+              child: TextFormField(
+                controller: _co2Controller,
+                decoration: const InputDecoration(
+                  labelText: 'Límite de CO₂ (ppm)',
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  labelStyle: TextStyle(fontSize: 14, color: AppColors.slate),
+                  fillColor: AppColors.ice,
+                  prefixIcon: Icon(Icons.co2, color: AppColors.blue),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                textInputAction: TextInputAction.next,
+                enabled: !loading,
+                validator: _validateLimit,
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-                signed: true,
-              ),
-              textInputAction: TextInputAction.next,
-              enabled: !loading,
-              validator: _validateLimit,
             ),
             const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _noiseController,
-              decoration: const InputDecoration(
-                labelText: 'Límite de ruido (dB)',
+            PlantSetupCard(
+              child: TextFormField(
+                controller: _noiseController,
+                decoration: const InputDecoration(
+                  labelText: 'Límite de ruido (dB)',
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  labelStyle: TextStyle(fontSize: 14, color: AppColors.slate),
+                  fillColor: AppColors.ice,
+                  prefixIcon: Icon(
+                    Icons.volume_up_outlined,
+                    color: AppColors.blue,
+                  ),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                textInputAction: TextInputAction.done,
+                enabled: !loading,
+                validator: _validateLimit,
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-                signed: true,
-              ),
-              textInputAction: TextInputAction.done,
-              enabled: !loading,
-              validator: _validateLimit,
             ),
             if (message != null) ...[
               const SizedBox(height: AppSpacing.md),
@@ -152,16 +174,32 @@ class _SavedThresholds extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       children: [
-        Text(
-          'Configuración guardada',
-          style: Theme.of(context).textTheme.headlineSmall,
+        PlantSetupIconLine(
+          icon: Icons.check_circle_outline,
+          child: Text(
+            'Configuración guardada',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
-        Text('CO₂: ${thresholds.co2LimitPpm} ppm'),
+        PlantSetupCard(
+          child: PlantSetupIconLine(
+            icon: Icons.co2,
+            child: Text('CO₂: ${thresholds.co2LimitPpm} ppm'),
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
-        Text('Ruido: ${thresholds.noiseLimitDb} dB'),
+        PlantSetupCard(
+          child: PlantSetupIconLine(
+            icon: Icons.volume_up_outlined,
+            child: Text('Ruido: ${thresholds.noiseLimitDb} dB'),
+          ),
+        ),
         const SizedBox(height: AppSpacing.lg),
         FilledButton(
           onPressed: () => context.pop(),
