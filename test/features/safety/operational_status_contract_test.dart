@@ -42,7 +42,7 @@ void main() {
     expect(actuatorRunStateFromWire('On'), ActuatorRunState.on);
     expect(actuatorRunStateFromWire('Deployed'), ActuatorRunState.deployed);
     expect(actuatorRunStateFromWire('Retracted'), ActuatorRunState.retracted);
-    expect(actuatorRunStateFromWire('Failed'), ActuatorRunState.failed);
+    expect(() => actuatorRunStateFromWire('Failed'), throwsFormatException);
     expect(actuatorModeFromWire('Auto'), ActuatorMode.auto);
     expect(actuatorModeFromWire('Overridden'), ActuatorMode.overridden);
 

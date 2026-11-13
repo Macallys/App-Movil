@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/override_actuator_request_dto.dart';
 
 void main() {
-  test('request contains only type and run state', () {
+  test('request contains only actuatorType and run state', () {
     const cases = [
       ('Extractor', 'On'),
       ('Extractor', 'Off'),
@@ -14,11 +14,12 @@ void main() {
 
     for (final (type, runState) in cases) {
       final json = OverrideActuatorRequestDto(
-        type: type,
+        actuatorType: type,
         runState: runState,
       ).toJson();
-      expect(json.keys, ['type', 'runState']);
-      expect(json, {'type': type, 'runState': runState});
+      expect(json.keys, ['actuatorType', 'runState']);
+      expect(json, {'actuatorType': type, 'runState': runState});
+      expect(json.containsKey('type'), isFalse);
       expect(json.containsKey('reason'), isFalse);
       expect(json.containsKey('duration'), isFalse);
       expect(json.containsKey('priority'), isFalse);

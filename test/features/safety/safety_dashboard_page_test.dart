@@ -269,7 +269,9 @@ class _QuietReadings implements SafetyRepository {
   Future<Result<LatestReadings>> getLatestReadings({required String areaId}) {
     return Future.value(
       const Success(
-        LatestReadings(carbonDioxide: null, noise: null, presence: null),
+        LatestReadings(
+      areaId: 'area-1',
+      carbonDioxide: null, noise: null, presence: null),
       ),
     );
   }
@@ -294,7 +296,14 @@ class _QuietReadings implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -334,7 +343,14 @@ class _IdleRepository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

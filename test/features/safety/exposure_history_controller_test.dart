@@ -37,7 +37,7 @@ void main() {
     final state = container.read(
       exposureHistoryControllerProvider,
     ) as ExposureHistoryData;
-    expect(state.exposures.single.exposureId, 'exposure-1');
+    expect(state.exposures.single.id, 'exposure-1');
   });
 
   test('an empty list becomes empty', () async {
@@ -96,7 +96,7 @@ void main() {
     final state = container.read(
       exposureHistoryControllerProvider,
     ) as ExposureHistoryData;
-    expect(state.exposures.single.exposureId, 'exposure-2');
+    expect(state.exposures.single.id, 'exposure-2');
   });
 }
 
@@ -114,10 +114,9 @@ ProviderContainer _container(SafetyRepository repository) {
 
 Exposure _exposure(String exposureId) {
   return Exposure(
-    exposureId: exposureId,
+    id: exposureId,
     areaId: 'area-1',
-    severity: ExposureSeverity.high,
-    recordedAt: DateTime.utc(2026, 5, 20, 15, 40),
+    raisedAt: DateTime.utc(2026, 5, 20, 15, 40),
   );
 }
 
@@ -159,7 +158,14 @@ class _Queue implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

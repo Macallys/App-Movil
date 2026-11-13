@@ -7,14 +7,14 @@ import 'package:safeplant_mobile/features/safety/domain/entities/actuator_state.
 void main() {
   const mapper = ActuatorActionMapper();
 
-  test('parses extractor, siren and barrier with every run state', () {
+  test('parses extractor, siren and barrier with succeeded flag', () {
     final dto = ActuatorActionsResponseDto.fromJson({
       'items': [
-        _json('action-1', 'Extractor', 'Off'),
-        _json('action-2', 'Siren', 'On'),
-        _json('action-3', 'Barrier', 'Deployed'),
-        _json('action-4', 'Barrier', 'Retracted'),
-        _json('action-5', 'Extractor', 'Failed'),
+        _json('action-1', 'Extractor', true),
+        _json('action-2', 'Siren', true),
+        _json('action-3', 'Barrier', true),
+        _json('action-4', 'Barrier', false),
+        _json('action-5', 'Extractor', false),
       ],
     });
 
@@ -25,15 +25,15 @@ void main() {
       'Barrier',
       'Extractor',
     ]);
-    expect(dto.items.map((item) => item.runState), [
-      'Off',
-      'On',
-      'Deployed',
-      'Retracted',
-      'Failed',
+    expect(dto.items.map((item) => item.succeeded), [
+      true,
+      true,
+      true,
+      false,
+      false,
     ]);
     expect(
-      dto.items.map((item) => item.executedAt),
+      dto.items.map((item) => item.recordedAt),
       everyElement(DateTime.utc(2026, 5, 20, 15, 45)),
     );
   });
@@ -47,68 +47,30 @@ void main() {
   test('mapper keeps the documented values', () {
     final action = mapper.toEntity(
       ActuatorActionDto(
-        actionId: 'action-3',
+        id: 'action-3',
         areaId: 'area-1',
         type: 'Barrier',
-        runState: 'Deployed',
-        executedAt: DateTime.utc(2026, 5, 20, 15, 45),
+        succeeded: true,
+        recordedAt: DateTime.utc(2026, 5, 20, 15, 45),
       ),
     );
 
-    expect(action.actionId, 'action-3');
+    expect(action.id, 'action-3');
     expect(action.areaId, 'area-1');
     expect(action.type, ActuatorType.barrier);
-    expect(action.runState, ActuatorRunState.deployed);
-    expect(action.executedAt, DateTime.utc(2026, 5, 20, 15, 45));
-  });
-
-  test('every documented run state maps without collapsing to a boolean', () {
-    const states = {
-      'Off': ActuatorRunState.off,
-      'On': ActuatorRunState.on,
-      'Deployed': ActuatorRunState.deployed,
-      'Retracted': ActuatorRunState.retracted,
-      'Failed': ActuatorRunState.failed,
-    };
-
-    for (final entry in states.entries) {
-      final action = mapper.toEntity(
-        ActuatorActionDto(
-          actionId: entry.key,
-          areaId: 'area-1',
-          type: 'Siren',
-          runState: entry.key,
-          executedAt: DateTime.utc(2026, 5, 20, 15, 45),
-        ),
-      );
-      expect(action.runState, entry.value);
-    }
+    expect(action.succeeded, isTrue);
+    expect(action.recordedAt, DateTime.utc(2026, 5, 20, 15, 45));
   });
 
   test('an unknown actuator type fails instead of using a default', () {
     expect(
       () => mapper.toEntity(
         ActuatorActionDto(
-          actionId: 'action-1',
+          id: 'action-1',
           areaId: 'area-1',
           type: 'Fan',
-          runState: 'On',
-          executedAt: DateTime.utc(2026, 5, 20, 15, 45),
-        ),
-      ),
-      throwsFormatException,
-    );
-  });
-
-  test('an unknown run state fails instead of using a default', () {
-    expect(
-      () => mapper.toEntity(
-        ActuatorActionDto(
-          actionId: 'action-1',
-          areaId: 'area-1',
-          type: 'Barrier',
-          runState: 'Open',
-          executedAt: DateTime.utc(2026, 5, 20, 15, 45),
+          succeeded: true,
+          recordedAt: DateTime.utc(2026, 5, 20, 15, 45),
         ),
       ),
       throwsFormatException,
@@ -118,22 +80,22 @@ void main() {
   test('a missing timestamp is rejected', () {
     expect(
       () => ActuatorActionDto.fromJson({
-        'actionId': 'action-1',
+        'id': 'action-1',
         'areaId': 'area-1',
         'type': 'Extractor',
-        'runState': 'Off',
+        'succeeded': true,
       }),
       throwsFormatException,
     );
   });
 }
 
-Map<String, dynamic> _json(String actionId, String type, String runState) {
+Map<String, dynamic> _json(String actionId, String type, bool succeeded) {
   return {
-    'actionId': actionId,
+    'id': actionId,
     'areaId': 'area-1',
     'type': type,
-    'runState': runState,
-    'executedAt': '2026-05-20T15:45:00Z',
+    'succeeded': succeeded,
+    'recordedAt': '2026-05-20T15:45:00Z',
   };
 }

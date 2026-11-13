@@ -97,7 +97,14 @@ class _Repository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

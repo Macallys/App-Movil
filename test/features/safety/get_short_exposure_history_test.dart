@@ -46,10 +46,9 @@ void main() {
 
 Exposure _exposure() {
   return Exposure(
-    exposureId: 'exposure-1',
+    id: 'exposure-1',
     areaId: 'area-1',
-    severity: ExposureSeverity.medium,
-    recordedAt: DateTime.utc(2026, 5, 20, 15, 40),
+    raisedAt: DateTime.utc(2026, 5, 20, 15, 40),
   );
 }
 
@@ -88,7 +87,14 @@ class _Repository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

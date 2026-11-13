@@ -15,7 +15,7 @@ import 'package:safeplant_mobile/features/safety/presentation/providers/safety_p
 import 'package:safeplant_mobile/features/safety/presentation/safety_labels.dart';
 
 void main() {
-  testWidgets('renders extractor, siren and barrier states', (tester) async {
+  testWidgets('renders extractor, siren and barrier outcomes', (tester) async {
     final older = DateTime.utc(2026, 5, 20, 15, 20);
     final newer = DateTime.utc(2026, 5, 20, 15, 45);
     await _pump(
@@ -25,29 +25,24 @@ void main() {
           _action(
             'old',
             type: ActuatorType.extractor,
-            runState: ActuatorRunState.off,
+            succeeded: true,
             executedAt: older,
           ),
           _action(
             'siren',
             type: ActuatorType.siren,
-            runState: ActuatorRunState.on,
+            succeeded: true,
             executedAt: newer,
           ),
           _action(
             'deployed',
             type: ActuatorType.barrier,
-            runState: ActuatorRunState.deployed,
-          ),
-          _action(
-            'retracted',
-            type: ActuatorType.barrier,
-            runState: ActuatorRunState.retracted,
+            succeeded: true,
           ),
           _action(
             'failed',
             type: ActuatorType.extractor,
-            runState: ActuatorRunState.failed,
+            succeeded: false,
           ),
         ]),
       ]),
@@ -55,12 +50,9 @@ void main() {
 
     expect(find.text('Extractor'), findsWidgets);
     expect(find.text('Siren'), findsOneWidget);
-    expect(find.text('Barrier'), findsNWidgets(2));
-    expect(find.text('Estado: Apagado'), findsOneWidget);
-    expect(find.text('Estado: Encendido'), findsOneWidget);
-    expect(find.text('Estado: Desplegado'), findsOneWidget);
-    expect(find.text('Estado: Replegado'), findsOneWidget);
-    expect(find.text('Estado: Fallo'), findsOneWidget);
+    expect(find.text('Barrier'), findsOneWidget);
+    expect(find.text('Resultado: Aplicado'), findsNWidgets(3));
+    expect(find.text('Resultado: Fallo'), findsOneWidget);
     expect(find.text(formatStatusDate(newer)), findsOneWidget);
     expect(
       tester.getTopLeft(find.text(formatStatusDate(newer))).dy,
@@ -89,8 +81,8 @@ void main() {
 
   testWidgets('pull to refresh reloads the actions', (tester) async {
     final repository = _Repository([
-      Success([_action('action-1', runState: ActuatorRunState.on)]),
-      Success([_action('action-2', runState: ActuatorRunState.off)]),
+      Success([_action('action-1', succeeded: true)]),
+      Success([_action('action-2', succeeded: false)]),
     ]);
     await _pump(tester, repository);
 
@@ -100,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.calls, 2);
-    expect(find.text('Estado: Apagado'), findsOneWidget);
+    expect(find.text('Resultado: Fallo'), findsOneWidget);
   });
 }
 
@@ -122,15 +114,15 @@ Future<void> _pump(WidgetTester tester, _Repository repository) {
 ActuatorAction _action(
   String actionId, {
   ActuatorType type = ActuatorType.extractor,
-  ActuatorRunState runState = ActuatorRunState.on,
+  bool succeeded = true,
   DateTime? executedAt,
 }) {
   return ActuatorAction(
-    actionId: actionId,
+    id: actionId,
     areaId: 'area-1',
     type: type,
-    runState: runState,
-    executedAt: executedAt ?? DateTime.utc(2026, 5, 20, 15, 40),
+    succeeded: succeeded,
+    recordedAt: executedAt ?? DateTime.utc(2026, 5, 20, 15, 40),
   );
 }
 
@@ -155,6 +147,13 @@ class _Repository implements SafetyRepository {
   }
 
   @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Result<LatestReadings>> getLatestReadings({required String areaId}) {
     throw UnimplementedError();
   }
@@ -172,7 +171,7 @@ class _Repository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

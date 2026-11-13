@@ -80,9 +80,7 @@ void main() {
 
   testWidgets('confirmation happens before the request', (tester) async {
     final repository = _Repository([
-      Future.value(
-        Success(_actuator(ActuatorType.extractor, ActuatorRunState.off)),
-      ),
+      Future.value(const Success(Unit())),
     ]);
     await _pump(
       tester,
@@ -108,7 +106,7 @@ void main() {
   testWidgets('submitting keeps the previous state until success', (
     tester,
   ) async {
-    final pending = Completer<Result<ActuatorState>>();
+    final pending = Completer<Result<Unit>>();
     final repository = _Repository([pending.future]);
     await _pump(
       tester,
@@ -129,15 +127,7 @@ void main() {
     await tester.tap(find.text('Apagar'), warnIfMissed: false);
     expect(repository.calls, 1);
 
-    pending.complete(
-      Success(
-        _actuator(
-          ActuatorType.extractor,
-          ActuatorRunState.off,
-          mode: ActuatorMode.overridden,
-        ),
-      ),
-    );
+    pending.complete(const Success(Unit()));
     await tester.pumpAndSettle();
 
     expect(find.text('Estado actual: Apagado'), findsOneWidget);
@@ -242,11 +232,11 @@ ActuatorState _actuator(
 class _Repository implements SafetyRepository {
   _Repository(this.pending);
 
-  final List<Future<Result<ActuatorState>>> pending;
+  final List<Future<Result<Unit>>> pending;
   var calls = 0;
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -258,6 +248,13 @@ class _Repository implements SafetyRepository {
 
   @override
   Future<Result<List<AreaOperationalStatus>>> getOperationalStatus() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
     throw UnimplementedError();
   }
 

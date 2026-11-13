@@ -5,10 +5,11 @@ void main() {
   test('parses three independent readings', () {
     final dto = LatestReadingsDto.fromJson(_json());
 
+    expect(dto.areaId, 'area-1');
     expect(dto.carbonDioxide?.deviceId, 'co2-1');
     expect(dto.carbonDioxide?.ppm, 810);
     expect(dto.noise?.deviceId, 'noise-1');
-    expect(dto.noise?.decibels, 85.5);
+    expect(dto.noise?.db, 85);
     expect(dto.presence?.deviceId, 'presence-1');
     expect(dto.presence?.state, 'Cleared');
   });
@@ -26,7 +27,7 @@ void main() {
     final dto = LatestReadingsDto.fromJson(_json(carbonDioxide: null));
 
     expect(dto.carbonDioxide, isNull);
-    expect(dto.noise?.decibels, 85.5);
+    expect(dto.noise?.db, 85);
     expect(dto.presence?.state, 'Cleared');
   });
 
@@ -46,14 +47,27 @@ void main() {
 
   test('all null sections stay null', () {
     final dto = LatestReadingsDto.fromJson(const {
+      'areaId': 'area-1',
       'carbonDioxide': null,
       'noise': null,
       'presence': null,
     });
 
+    expect(dto.areaId, 'area-1');
     expect(dto.carbonDioxide, isNull);
     expect(dto.noise, isNull);
     expect(dto.presence, isNull);
+  });
+
+  test('decimal noise is rejected', () {
+    expect(
+      () => LatestReadingsDto.fromJson(_json(noise: {
+        'deviceId': 'noise-1',
+        'db': 85.5,
+        'recordedAt': '2026-05-20T15:33:00Z',
+      })),
+      throwsFormatException,
+    );
   });
 }
 
@@ -63,6 +77,7 @@ Map<String, dynamic> _json({
   Object? presence = _present,
 }) {
   return {
+    'areaId': 'area-1',
     'carbonDioxide': identical(carbonDioxide, _present)
         ? {
             'deviceId': 'co2-1',
@@ -73,7 +88,7 @@ Map<String, dynamic> _json({
     'noise': identical(noise, _present)
         ? {
             'deviceId': 'noise-1',
-            'decibels': 85.5,
+            'db': 85,
             'recordedAt': '2026-05-20T15:33:00Z',
           }
         : noise,

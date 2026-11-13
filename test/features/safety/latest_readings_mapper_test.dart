@@ -12,6 +12,7 @@ void main() {
   test('keeps each reading field on its own entity', () {
     final readings = mapper.toEntity(
       LatestReadingsDto(
+      areaId: 'area-1',
         carbonDioxide: CarbonDioxideReadingDto(
           deviceId: 'co2-1',
           ppm: 810,
@@ -19,7 +20,7 @@ void main() {
         ),
         noise: NoiseReadingDto(
           deviceId: 'noise-1',
-          decibels: 85.5,
+          db: 85,
           recordedAt: DateTime.utc(2026, 5, 20, 15, 33),
         ),
         presence: PresenceReadingDto(
@@ -30,6 +31,7 @@ void main() {
       ),
     );
 
+    expect(readings.areaId, 'area-1');
     expect(readings.carbonDioxide?.deviceId, 'co2-1');
     expect(readings.carbonDioxide?.ppm, 810);
     expect(
@@ -37,7 +39,7 @@ void main() {
       DateTime.utc(2026, 5, 20, 15, 35),
     );
     expect(readings.noise?.deviceId, 'noise-1');
-    expect(readings.noise?.decibels, 85.5);
+    expect(readings.noise?.db, 85);
     expect(readings.noise?.recordedAt, DateTime.utc(2026, 5, 20, 15, 33));
     expect(readings.presence?.deviceId, 'presence-1');
     expect(readings.presence?.state, PresenceState.detected);
@@ -46,7 +48,12 @@ void main() {
 
   test('does not invent a reading for a null section', () {
     final readings = mapper.toEntity(
-      const LatestReadingsDto(carbonDioxide: null, noise: null, presence: null),
+      const LatestReadingsDto(
+      areaId: 'area-1',
+        carbonDioxide: null,
+        noise: null,
+        presence: null,
+      ),
     );
 
     expect(readings.carbonDioxide, isNull);

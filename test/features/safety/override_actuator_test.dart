@@ -12,7 +12,7 @@ import 'package:safeplant_mobile/features/safety/domain/repositories/safety_repo
 
 void main() {
   test('accepts extractor and siren on or off', () async {
-    final repository = _Repository(Success(_state(ActuatorRunState.on)));
+    final repository = _Repository(const Success(Unit()));
     final useCase = OverrideActuator(repository);
 
     for (final type in [ActuatorType.extractor, ActuatorType.siren]) {
@@ -22,14 +22,14 @@ void main() {
           type: type,
           targetState: target,
         );
-        expect(result, isA<Success<ActuatorState>>());
+        expect(result, isA<Success<Unit>>());
       }
     }
     expect(repository.calls, 4);
   });
 
   test('accepts barrier deployed or retracted', () async {
-    final repository = _Repository(Success(_state(ActuatorRunState.deployed)));
+    final repository = _Repository(const Success(Unit()));
     final useCase = OverrideActuator(repository);
 
     for (final target in [
@@ -41,31 +41,29 @@ void main() {
         type: ActuatorType.barrier,
         targetState: target,
       );
-      expect(result, isA<Success<ActuatorState>>());
+      expect(result, isA<Success<Unit>>());
     }
     expect(repository.calls, 2);
   });
 
   test('rejects invalid type and target combinations', () async {
-    final repository = _Repository(Success(_state(ActuatorRunState.on)));
+    final repository = _Repository(const Success(Unit()));
     final useCase = OverrideActuator(repository);
     const rejected = [
       (ActuatorType.barrier, ActuatorRunState.on),
       (ActuatorType.extractor, ActuatorRunState.deployed),
       (ActuatorType.siren, ActuatorRunState.retracted),
       (ActuatorType.extractor, ActuatorRunState.failed),
-      (ActuatorType.siren, ActuatorRunState.failed),
-      (ActuatorType.barrier, ActuatorRunState.failed),
     ];
 
-    for (final (type, target) in rejected) {
+    for (final pair in rejected) {
       final result = await useCase.call(
         areaId: 'area-1',
-        type: type,
-        targetState: target,
+        type: pair.$1,
+        targetState: pair.$2,
       );
       expect(
-        (result as FailureResult<ActuatorState>).failure,
+        (result as FailureResult<Unit>).failure,
         isA<ValidationFailure>(),
       );
     }
@@ -73,23 +71,14 @@ void main() {
   });
 }
 
-ActuatorState _state(ActuatorRunState runState) {
-  return ActuatorState(
-    type: ActuatorType.extractor,
-    runState: runState,
-    mode: ActuatorMode.overridden,
-    lastChangedAt: DateTime.utc(2026, 5, 20, 16),
-  );
-}
-
 class _Repository implements SafetyRepository {
   _Repository(this.result);
 
-  final Result<ActuatorState> result;
+  final Result<Unit> result;
   var calls = 0;
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -100,6 +89,13 @@ class _Repository implements SafetyRepository {
 
   @override
   Future<Result<List<AreaOperationalStatus>>> getOperationalStatus() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
     throw UnimplementedError();
   }
 

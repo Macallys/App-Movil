@@ -36,7 +36,7 @@ void main() {
 
     final state = container.read(activeAlertsControllerProvider);
     expect(state, isA<ActiveAlertsData>());
-    expect((state as ActiveAlertsData).alerts.single.alertId, 'alert-1');
+    expect((state as ActiveAlertsData).alerts.single.id, 'alert-1');
   });
 
   test('an empty list becomes empty', () async {
@@ -89,7 +89,7 @@ void main() {
       final state =
           container.read(activeAlertsControllerProvider) as ActiveAlertsData;
       expect(repository.calls, 2);
-      expect(state.alerts.single.alertId, 'alert-2');
+      expect(state.alerts.single.id, 'alert-2');
       container.dispose();
     });
   });
@@ -170,7 +170,7 @@ void main() {
 
       final state =
           container.read(activeAlertsControllerProvider) as ActiveAlertsData;
-      expect(state.alerts.single.alertId, 'alert-1');
+      expect(state.alerts.single.id, 'alert-1');
       expect(state.refreshError, isTrue);
       container.dispose();
     });
@@ -198,7 +198,7 @@ void main() {
 
       final state =
           container.read(activeAlertsControllerProvider) as ActiveAlertsData;
-      expect(state.alerts.single.alertId, 'alert-2');
+      expect(state.alerts.single.id, 'alert-2');
       expect(state.refreshError, isFalse);
       container.dispose();
     });
@@ -219,10 +219,9 @@ ProviderContainer _container(SafetyRepository repository) {
 
 EnvironmentalAlert _alert(String alertId) {
   return EnvironmentalAlert(
-    alertId: alertId,
+    id: alertId,
     areaId: 'area-1',
-    severity: ExposureSeverity.medium,
-    recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
+    raisedAt: DateTime.utc(2026, 5, 20, 15, 35),
   );
 }
 
@@ -259,7 +258,14 @@ class _Pending implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -308,7 +314,14 @@ class _Gate implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -355,7 +368,14 @@ class _Sequence implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

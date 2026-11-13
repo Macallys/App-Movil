@@ -63,7 +63,9 @@ void main() {
         .load('area-1');
     pending.complete(
       const Success(
-        LatestReadings(carbonDioxide: null, noise: null, presence: null),
+        LatestReadings(
+      areaId: 'area-1',
+      carbonDioxide: null, noise: null, presence: null),
       ),
     );
     await loading;
@@ -104,7 +106,8 @@ ProviderContainer _container(Future<Result<LatestReadings>> result) {
 
 LatestReadings _readings({bool noise = true}) {
   return LatestReadings(
-    carbonDioxide: CarbonDioxideReading(
+      areaId: 'area-1',
+      carbonDioxide: CarbonDioxideReading(
       deviceId: 'co2-1',
       ppm: 810,
       recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
@@ -112,7 +115,7 @@ LatestReadings _readings({bool noise = true}) {
     noise: noise
         ? NoiseReading(
             deviceId: 'noise-1',
-            decibels: 85.5,
+            db: 85,
             recordedAt: DateTime.utc(2026, 5, 20, 15, 33),
           )
         : null,
@@ -159,7 +162,14 @@ class _Repository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

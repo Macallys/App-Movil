@@ -8,43 +8,43 @@ void main() {
     final dto = ActiveAlertsResponseDto.fromJson({
       'items': [
         {
-          'alertId': 'alert-1',
+          'id': 'alert-1',
           'areaId': 'area-1',
-          'severity': 'High',
-          'recordedAt': '2026-05-20T15:35:00Z',
+          'raisedAt': '2026-05-20T15:35:00Z',
+          'withdrawnAt': null,
         },
       ],
     });
 
-    expect(dto.items.single.alertId, 'alert-1');
+    expect(dto.items.single.id, 'alert-1');
     expect(dto.items.single.areaId, 'area-1');
-    expect(dto.items.single.severity, 'High');
-    expect(dto.items.single.recordedAt, DateTime.utc(2026, 5, 20, 15, 35));
+    expect(dto.items.single.raisedAt, DateTime.utc(2026, 5, 20, 15, 35));
+    expect(dto.items.single.withdrawnAt, isNull);
   });
 
   test('a null identity is rejected', () {
     expect(
       () => EnvironmentalAlertDto.fromJson({
-        'alertId': null,
+        'id': null,
         'areaId': 'area-1',
-        'severity': 'Medium',
-        'recordedAt': '2026-05-20T15:35:00Z',
+        'raisedAt': '2026-05-20T15:35:00Z',
       }),
       throwsFormatException,
     );
   });
 
-  test('an unknown severity fails instead of becoming a valid value', () {
-    final dto = EnvironmentalAlertDto(
-      alertId: 'alert-1',
-      areaId: 'area-1',
-      severity: 'Critical',
-      recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
+  test('mapper keeps raised and withdrawn timestamps', () {
+    final alert = const EnvironmentalAlertMapper().toEntity(
+      EnvironmentalAlertDto(
+        id: 'alert-1',
+        areaId: 'area-1',
+        raisedAt: DateTime.utc(2026, 5, 20, 15, 35),
+        withdrawnAt: DateTime.utc(2026, 5, 20, 16),
+      ),
     );
 
-    expect(
-      () => const EnvironmentalAlertMapper().toEntity(dto),
-      throwsFormatException,
-    );
+    expect(alert.id, 'alert-1');
+    expect(alert.isOpen, isFalse);
+    expect(alert.withdrawnAt, DateTime.utc(2026, 5, 20, 16));
   });
 }

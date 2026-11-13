@@ -37,7 +37,7 @@ void main() {
     final state = container.read(
       actuatorActionsControllerProvider,
     ) as ActuatorActionsData;
-    expect(state.actions.single.actionId, 'action-1');
+    expect(state.actions.single.id, 'action-1');
   });
 
   test('an empty list becomes empty', () async {
@@ -96,7 +96,7 @@ void main() {
     final state = container.read(
       actuatorActionsControllerProvider,
     ) as ActuatorActionsData;
-    expect(state.actions.single.actionId, 'action-2');
+    expect(state.actions.single.id, 'action-2');
   });
 }
 
@@ -114,11 +114,11 @@ ProviderContainer _container(SafetyRepository repository) {
 
 ActuatorAction _action(String actionId) {
   return ActuatorAction(
-    actionId: actionId,
+    id: actionId,
     areaId: 'area-1',
     type: ActuatorType.siren,
-    runState: ActuatorRunState.on,
-    executedAt: DateTime.utc(2026, 5, 20, 15, 45),
+    succeeded: true,
+    recordedAt: DateTime.utc(2026, 5, 20, 15, 45),
   );
 }
 
@@ -160,7 +160,14 @@ class _Queue implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

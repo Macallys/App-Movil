@@ -7,7 +7,6 @@ import 'package:safeplant_mobile/core/network/api_exception.dart';
 import 'package:safeplant_mobile/features/safety/data/datasources/safety_remote_data_source.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/actuator_action_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/actuator_actions_response_dto.dart';
-import 'package:safeplant_mobile/features/safety/data/dtos/actuator_state_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/active_alerts_response_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/carbon_dioxide_reading_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/environmental_alert_dto.dart';
@@ -50,7 +49,7 @@ void main() {
               'actuators': [
                 {
                   'type': 'Extractor',
-                  'runState': 'Failed',
+                  'runState': 'Off',
                   'mode': 'Auto',
                   'lastChangedAt': '2026-03-01T00:00:00Z',
                 },
@@ -68,7 +67,7 @@ void main() {
     expect(area.noiseDb, 70);
     expect(area.presenceState, isNull);
     expect(area.severity, ExposureSeverity.none);
-    expect(area.actuators.single.runState, ActuatorRunState.failed);
+    expect(area.actuators.single.runState, ActuatorRunState.off);
   });
 
   test('200 with an empty item list stays empty', () async {
@@ -128,13 +127,15 @@ void main() {
     );
   });
 
-  test('the open path does not perform HTTP', () async {
+  test('operational status uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
@@ -156,11 +157,9 @@ void main() {
 
     final result = await repository.getOperationalStatus();
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<List<AreaOperationalStatus>>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/operational-status');
+    expect((result as Success<List<AreaOperationalStatus>>).value, isEmpty);
   });
 
   test('200 full maps each reading independently', () async {
@@ -172,7 +171,7 @@ void main() {
     expect(readings.carbonDioxide?.deviceId, 'co2-1');
     expect(readings.carbonDioxide?.ppm, 810);
     expect(readings.noise?.deviceId, 'noise-1');
-    expect(readings.noise?.decibels, 85.5);
+    expect(readings.noise?.db, 85);
     expect(readings.presence?.deviceId, 'presence-1');
     expect(readings.presence?.state, PresenceState.detected);
     expect(
@@ -198,7 +197,8 @@ void main() {
     final repository = _repository(
       FakeSafetyRemote(
         readings: const LatestReadingsDto(
-          carbonDioxide: null,
+      areaId: 'area-1',
+      carbonDioxide: null,
           noise: null,
           presence: null,
         ),
@@ -266,18 +266,25 @@ void main() {
     );
   });
 
-  test('latest readings open path does not perform HTTP', () async {
+  test('latest readings uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
               statusCode: 200,
-              data: const <String, dynamic>{},
+              data: const <String, dynamic>{
+                'areaId': 'area-1',
+                'carbonDioxide': null,
+                'noise': null,
+                'presence': null,
+              },
             ),
           );
         },
@@ -294,11 +301,9 @@ void main() {
 
     final result = await repository.getLatestReadings(areaId: 'area-1');
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<LatestReadings>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/area-1/telemetry/latest');
+    expect((result as Success<LatestReadings>).value.hasTelemetry, isFalse);
   });
 
   test('200 items become active alerts', () async {
@@ -308,10 +313,10 @@ void main() {
 
     final alerts = (result as Success<List<EnvironmentalAlert>>).value;
     expect(alerts, hasLength(1));
-    expect(alerts.single.alertId, 'alert-1');
+    expect(alerts.single.id, 'alert-1');
     expect(alerts.single.areaId, 'area-1');
-    expect(alerts.single.severity, ExposureSeverity.high);
-    expect(alerts.single.recordedAt, DateTime.utc(2026, 5, 20, 15, 35));
+    expect(alerts.single.raisedAt, DateTime.utc(2026, 5, 20, 15, 35));
+    expect(alerts.single.isOpen, isTrue);
   });
 
   test('200 empty alerts stay an empty success', () async {
@@ -376,13 +381,15 @@ void main() {
     );
   });
 
-  test('active alerts open path does not perform HTTP', () async {
+  test('active alerts uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
@@ -404,11 +411,9 @@ void main() {
 
     final result = await repository.getActiveAlerts();
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<List<EnvironmentalAlert>>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/alerts/active');
+    expect((result as Success<List<EnvironmentalAlert>>).value, isEmpty);
   });
 
   test('200 items become exposures', () async {
@@ -417,10 +422,10 @@ void main() {
     final result = await repository.getShortExposureHistory(areaId: 'area-1');
 
     final exposures = (result as Success<List<Exposure>>).value;
-    expect(exposures.single.exposureId, 'exposure-1');
+    expect(exposures.single.id, 'exposure-1');
     expect(exposures.single.areaId, 'area-1');
-    expect(exposures.single.severity, ExposureSeverity.high);
-    expect(exposures.single.recordedAt, DateTime.utc(2026, 5, 20, 15, 40));
+    expect(exposures.single.raisedAt, DateTime.utc(2026, 5, 20, 15, 40));
+    expect(exposures.single.isOpen, isTrue);
   });
 
   test('200 empty exposure history stays an empty success', () async {
@@ -487,13 +492,15 @@ void main() {
     );
   });
 
-  test('exposure history open path does not perform HTTP', () async {
+  test('exposure history uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
@@ -515,11 +522,9 @@ void main() {
 
     final result = await repository.getShortExposureHistory(areaId: 'area-1');
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<List<Exposure>>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/area-1/exposures');
+    expect((result as Success<List<Exposure>>).value, isEmpty);
   });
 
   test('200 with items becomes actuator actions', () async {
@@ -528,9 +533,9 @@ void main() {
     final result = await repository.getActuatorActions(areaId: 'area-1');
 
     final actions = (result as Success<List<ActuatorAction>>).value;
-    expect(actions.single.actionId, 'action-1');
+    expect(actions.single.id, 'action-1');
     expect(actions.single.type, ActuatorType.extractor);
-    expect(actions.single.runState, ActuatorRunState.on);
+    expect(actions.single.succeeded, isTrue);
   });
 
   test('200 with an empty actuator action list stays empty', () async {
@@ -595,13 +600,15 @@ void main() {
     );
   });
 
-  test('actuator actions open path does not perform HTTP', () async {
+  test('actuator actions uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
@@ -623,17 +630,13 @@ void main() {
 
     final result = await repository.getActuatorActions(areaId: 'area-1');
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<List<ActuatorAction>>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/area-1/actuator-actions');
+    expect((result as Success<List<ActuatorAction>>).value, isEmpty);
   });
 
-  test('successful override returns the actuator from the response', () async {
-    final remote = FakeSafetyRemote(
-      overrideState: _actuatorDto(mode: 'Overridden', runState: 'Off'),
-    );
+  test('successful override returns Unit after 204', () async {
+    final remote = FakeSafetyRemote();
     final repository = _repository(remote);
 
     final result = await repository.overrideActuator(
@@ -642,33 +645,14 @@ void main() {
       targetState: ActuatorRunState.off,
     );
 
-    final actuator = (result as Success<ActuatorState>).value;
-    expect(actuator.type, ActuatorType.extractor);
-    expect(actuator.runState, ActuatorRunState.off);
-    expect(actuator.mode, ActuatorMode.overridden);
+    expect(result, isA<Success<Unit>>());
     expect(remote.overrideCalls, 1);
     expect(remote.overrideAreaId, 'area-1');
-    expect(remote.overrideRequest?.toJson().keys, ['type', 'runState']);
+    expect(remote.overrideRequest?.toJson().keys, ['actuatorType', 'runState']);
     expect(remote.overrideRequest?.toJson(), {
-      'type': 'Extractor',
+      'actuatorType': 'Extractor',
       'runState': 'Off',
     });
-  });
-
-  test('override keeps Auto when the response says Auto', () async {
-    final repository = _repository(
-      FakeSafetyRemote(
-        overrideState: _actuatorDto(mode: 'Auto', runState: 'On'),
-      ),
-    );
-
-    final result = await repository.overrideActuator(
-      areaId: 'area-1',
-      type: ActuatorType.siren,
-      targetState: ActuatorRunState.on,
-    );
-
-    expect((result as Success<ActuatorState>).value.mode, ActuatorMode.auto);
   });
 
   test('503 edge_unreachable becomes edge unavailable', () async {
@@ -689,7 +673,7 @@ void main() {
     );
 
     expect(
-      (result as FailureResult<ActuatorState>).failure,
+      (result as FailureResult<Unit>).failure,
       isA<EdgeUnavailableFailure>(),
     );
   });
@@ -711,7 +695,7 @@ void main() {
     );
 
     expect(
-      (result as FailureResult<ActuatorState>).failure,
+      (result as FailureResult<Unit>).failure,
       isA<UnauthorizedFailure>(),
     );
   });
@@ -734,7 +718,7 @@ void main() {
     );
 
     expect(
-      (result as FailureResult<ActuatorState>).failure,
+      (result as FailureResult<Unit>).failure,
       isA<ForbiddenFailure>(),
     );
   });
@@ -752,23 +736,27 @@ void main() {
       targetState: ActuatorRunState.off,
     );
 
-    final failure = (result as FailureResult<ActuatorState>).failure;
+    final failure = (result as FailureResult<Unit>).failure;
     expect(failure, isA<NetworkFailure>());
     expect(failure, isNot(isA<EdgeUnavailableFailure>()));
   });
 
-  test('override open path does not perform HTTP', () async {
+  test('override uses the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
+    Object? body;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
+          body = options.data;
           handler.resolve(
             Response<dynamic>(
               requestOptions: options,
-              statusCode: 200,
-              data: const <String, dynamic>{},
+              statusCode: 204,
+              data: '',
             ),
           );
         },
@@ -789,11 +777,10 @@ void main() {
       targetState: ActuatorRunState.off,
     );
 
-    expect(calls, 0);
-    expect(
-      (result as FailureResult<ActuatorState>).failure,
-      isA<UnknownFailure>(),
-    );
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/area-1/actuators/override');
+    expect(body, {'actuatorType': 'Extractor', 'runState': 'Off'});
+    expect(result, isA<Success<Unit>>());
   });
 }
 
@@ -810,7 +797,8 @@ SafetyRepositoryImpl _repository(FakeSafetyRemote remote) {
 
 LatestReadingsDto _readingsDto({bool includeNoise = true}) {
   return LatestReadingsDto(
-    carbonDioxide: CarbonDioxideReadingDto(
+      areaId: 'area-1',
+      carbonDioxide: CarbonDioxideReadingDto(
       deviceId: 'co2-1',
       ppm: 810,
       recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
@@ -818,7 +806,7 @@ LatestReadingsDto _readingsDto({bool includeNoise = true}) {
     noise: includeNoise
         ? NoiseReadingDto(
             deviceId: 'noise-1',
-            decibels: 85.5,
+            db: 85,
             recordedAt: DateTime.utc(2026, 5, 20, 15, 33),
           )
         : null,
@@ -834,10 +822,9 @@ ActiveAlertsResponseDto _alertsDto() {
   return ActiveAlertsResponseDto(
     items: [
       EnvironmentalAlertDto(
-        alertId: 'alert-1',
+        id: 'alert-1',
         areaId: 'area-1',
-        severity: 'High',
-        recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
+        raisedAt: DateTime.utc(2026, 5, 20, 15, 35),
       ),
     ],
   );
@@ -847,25 +834,13 @@ ActuatorActionsResponseDto _actionsDto() {
   return ActuatorActionsResponseDto(
     items: [
       ActuatorActionDto(
-        actionId: 'action-1',
+        id: 'action-1',
         areaId: 'area-1',
         type: 'Extractor',
-        runState: 'On',
-        executedAt: DateTime.utc(2026, 5, 20, 15, 45),
+        succeeded: true,
+        recordedAt: DateTime.utc(2026, 5, 20, 15, 45),
       ),
     ],
-  );
-}
-
-ActuatorStateDto _actuatorDto({
-  required String mode,
-  required String runState,
-}) {
-  return ActuatorStateDto(
-    type: 'Extractor',
-    runState: runState,
-    mode: mode,
-    lastChangedAt: DateTime.utc(2026, 5, 20, 16),
   );
 }
 
@@ -873,10 +848,9 @@ ShortExposureHistoryResponseDto _historyDto() {
   return ShortExposureHistoryResponseDto(
     items: [
       ExposureDto(
-        exposureId: 'exposure-1',
+        id: 'exposure-1',
         areaId: 'area-1',
-        severity: 'High',
-        recordedAt: DateTime.utc(2026, 5, 20, 15, 40),
+        raisedAt: DateTime.utc(2026, 5, 20, 15, 40),
       ),
     ],
   );

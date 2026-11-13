@@ -3,8 +3,8 @@ import 'package:safeplant_mobile/core/network/api_client.dart';
 import 'package:safeplant_mobile/core/network/api_exception.dart';
 import 'package:safeplant_mobile/features/safety/data/datasources/safety_remote_data_source.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/actuator_actions_response_dto.dart';
-import 'package:safeplant_mobile/features/safety/data/dtos/actuator_state_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/active_alerts_response_dto.dart';
+import 'package:safeplant_mobile/features/safety/data/dtos/area_operational_status_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/latest_readings_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/operational_status_response_dto.dart';
 import 'package:safeplant_mobile/features/safety/data/dtos/override_actuator_request_dto.dart';
@@ -13,6 +13,7 @@ import 'package:safeplant_mobile/features/safety/data/dtos/short_exposure_histor
 class FakeSafetyRemote extends SafetyRemoteDataSource {
   FakeSafetyRemote({
     this.status,
+    this.areaStatus,
     this.error,
     this.readings,
     this.readingsError,
@@ -22,11 +23,12 @@ class FakeSafetyRemote extends SafetyRemoteDataSource {
     this.historyError,
     this.actions,
     this.actionsError,
-    this.overrideState,
     this.overrideError,
+    this.overrideSucceeds = true,
   }) : super(ApiClient(dio: Dio()));
 
   final OperationalStatusResponseDto? status;
+  final AreaOperationalStatusDto? areaStatus;
   final ApiException? error;
   final LatestReadingsDto? readings;
   final ApiException? readingsError;
@@ -36,8 +38,8 @@ class FakeSafetyRemote extends SafetyRemoteDataSource {
   final ApiException? historyError;
   final ActuatorActionsResponseDto? actions;
   final ApiException? actionsError;
-  final ActuatorStateDto? overrideState;
   final ApiException? overrideError;
+  final bool overrideSucceeds;
   var overrideCalls = 0;
   String? overrideAreaId;
   OverrideActuatorRequestDto? overrideRequest;
@@ -49,6 +51,17 @@ class FakeSafetyRemote extends SafetyRemoteDataSource {
       throw failure;
     }
     return status!;
+  }
+
+  @override
+  Future<AreaOperationalStatusDto> getAreaOperationalStatus({
+    required String areaId,
+  }) async {
+    final failure = error;
+    if (failure != null) {
+      throw failure;
+    }
+    return areaStatus!;
   }
 
   @override
@@ -92,7 +105,7 @@ class FakeSafetyRemote extends SafetyRemoteDataSource {
   }
 
   @override
-  Future<ActuatorStateDto> overrideActuator({
+  Future<void> overrideActuator({
     required String areaId,
     required OverrideActuatorRequestDto request,
   }) async {
@@ -103,6 +116,8 @@ class FakeSafetyRemote extends SafetyRemoteDataSource {
     if (failure != null) {
       throw failure;
     }
-    return overrideState!;
+    if (!overrideSucceeds) {
+      throw const ApiException(message: 'Unexpected response', statusCode: 200);
+    }
   }
 }

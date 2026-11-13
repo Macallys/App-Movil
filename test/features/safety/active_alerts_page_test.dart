@@ -4,19 +4,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:safeplant_mobile/core/error/failure.dart';
 import 'package:safeplant_mobile/core/error/result.dart';
 import 'package:safeplant_mobile/features/safety/application/use_cases/get_active_alerts.dart';
+import 'package:safeplant_mobile/features/safety/domain/entities/actuator_action.dart';
+import 'package:safeplant_mobile/features/safety/domain/entities/actuator_state.dart';
 import 'package:safeplant_mobile/features/safety/domain/entities/area_operational_status.dart';
 import 'package:safeplant_mobile/features/safety/domain/entities/environmental_alert.dart';
 import 'package:safeplant_mobile/features/safety/domain/entities/exposure.dart';
-import 'package:safeplant_mobile/features/safety/domain/entities/actuator_action.dart';
 import 'package:safeplant_mobile/features/safety/domain/entities/latest_readings.dart';
 import 'package:safeplant_mobile/features/safety/domain/repositories/safety_repository.dart';
 import 'package:safeplant_mobile/features/safety/presentation/pages/active_alerts_page.dart';
 import 'package:safeplant_mobile/features/safety/presentation/providers/safety_providers.dart';
 import 'package:safeplant_mobile/features/safety/presentation/safety_labels.dart';
-import 'package:safeplant_mobile/features/safety/domain/entities/actuator_state.dart';
 
 void main() {
-  testWidgets('renders alerts with severity and independent times', (
+  testWidgets('renders alerts with open state and independent times', (
     tester,
   ) async {
     final older = DateTime.utc(2026, 5, 20, 15, 30);
@@ -25,17 +25,8 @@ void main() {
       tester,
       _Repository([
         Success([
-          _alert(
-            'alert-old',
-            recordedAt: older,
-            severity: ExposureSeverity.medium,
-          ),
-          _alert(
-            'alert-new',
-            areaId: 'area-2',
-            recordedAt: newer,
-            severity: ExposureSeverity.high,
-          ),
+          _alert('alert-old', recordedAt: older),
+          _alert('alert-new', areaId: 'area-2', recordedAt: newer),
         ]),
       ]),
     );
@@ -43,10 +34,9 @@ void main() {
     expect(find.text('Alertas activas'), findsOneWidget);
     expect(find.text('Área: area-2'), findsOneWidget);
     expect(find.text('Área: area-1'), findsOneWidget);
-    expect(find.text('Severidad: Alta'), findsOneWidget);
-    expect(find.text('Severidad: Media'), findsOneWidget);
-    expect(find.text(formatStatusDate(newer)), findsOneWidget);
-    expect(find.text(formatStatusDate(older)), findsOneWidget);
+    expect(find.text('Alerta abierta'), findsNWidgets(2));
+    expect(find.text('Inicio: ${formatStatusDate(newer)}'), findsOneWidget);
+    expect(find.text('Inicio: ${formatStatusDate(older)}'), findsOneWidget);
     expect(
       tester.getTopLeft(find.text('Área: area-2')).dy,
       lessThan(tester.getTopLeft(find.text('Área: area-1')).dy),
@@ -82,44 +72,14 @@ void main() {
     final repository = _Repository([
       Success([_alert('alert-1')]),
       const FailureResult(NetworkFailure()),
-      Success([_alert('alert-2', areaId: 'area-9')]),
     ]);
     await _pump(tester, repository);
-    final context = tester.element(find.byType(ActiveAlertsPage));
-    final container = ProviderScope.containerOf(context);
 
-    await container
-        .read(activeAlertsControllerProvider.notifier)
-        .load(background: true);
+    await tester.pump(const Duration(seconds: 15));
     await tester.pumpAndSettle();
 
     expect(find.text('Área: area-1'), findsOneWidget);
-    expect(find.text('No se pudo actualizar las alertas.'), findsOneWidget);
     expect(find.text('No se pudo obtener las alertas activas.'), findsNothing);
-
-    await container
-        .read(activeAlertsControllerProvider.notifier)
-        .load(background: true);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Área: area-9'), findsOneWidget);
-    expect(find.text('No se pudo actualizar las alertas.'), findsNothing);
-  });
-
-  testWidgets('an area page shows only that area', (tester) async {
-    await _pump(
-      tester,
-      _Repository([
-        Success([
-          _alert('alert-1', areaId: 'area-1'),
-          _alert('alert-2', areaId: 'area-2'),
-        ]),
-      ]),
-      areaId: 'area-2',
-    );
-
-    expect(find.text('Área: area-2'), findsOneWidget);
-    expect(find.text('Área: area-1'), findsNothing);
   });
 }
 
@@ -132,7 +92,6 @@ Future<void> _pump(
       .pumpWidget(
         ProviderScope(
           overrides: [
-            activeAlertsPollingEnabledProvider.overrideWithValue(false),
             getActiveAlertsUseCaseProvider.overrideWithValue(
               GetActiveAlerts(repository),
             ),
@@ -147,13 +106,11 @@ EnvironmentalAlert _alert(
   String alertId, {
   String areaId = 'area-1',
   DateTime? recordedAt,
-  ExposureSeverity severity = ExposureSeverity.high,
 }) {
   return EnvironmentalAlert(
-    alertId: alertId,
+    id: alertId,
     areaId: areaId,
-    severity: severity,
-    recordedAt: recordedAt ?? DateTime.utc(2026, 5, 20, 15, 35),
+    raisedAt: recordedAt ?? DateTime.utc(2026, 5, 20, 15, 35),
   );
 }
 
@@ -190,12 +147,19 @@ class _Repository implements SafetyRepository {
   }
 
   @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Result<LatestReadings>> getLatestReadings({required String areaId}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

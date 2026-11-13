@@ -24,14 +24,15 @@ void main() {
     await _pump(
       tester,
       LatestReadings(
-        carbonDioxide: CarbonDioxideReading(
+      areaId: 'area-1',
+      carbonDioxide: CarbonDioxideReading(
           deviceId: 'co2-1',
           ppm: 810,
           recordedAt: co2At,
         ),
         noise: NoiseReading(
           deviceId: 'noise-1',
-          decibels: 85.5,
+          db: 85,
           recordedAt: noiseAt,
         ),
         presence: PresenceReading(
@@ -44,7 +45,7 @@ void main() {
 
     expect(find.text('Últimas lecturas'), findsOneWidget);
     expect(find.text('810 ppm'), findsOneWidget);
-    expect(find.text('85.5 dB'), findsOneWidget);
+    expect(find.text('85 dB'), findsOneWidget);
     expect(find.text('Detectada'), findsOneWidget);
     expect(find.text('Dispositivo: co2-1'), findsOneWidget);
     expect(find.text('Dispositivo: noise-1'), findsOneWidget);
@@ -59,7 +60,8 @@ void main() {
     await _pump(
       tester,
       LatestReadings(
-        carbonDioxide: CarbonDioxideReading(
+      areaId: 'area-1',
+      carbonDioxide: CarbonDioxideReading(
           deviceId: 'co2-1',
           ppm: 810,
           recordedAt: DateTime.utc(2026, 5, 20, 15, 35),
@@ -85,7 +87,9 @@ void main() {
   testWidgets('three null readings show one empty message', (tester) async {
     await _pump(
       tester,
-      const LatestReadings(carbonDioxide: null, noise: null, presence: null),
+      const LatestReadings(
+      areaId: 'area-1',
+      carbonDioxide: null, noise: null, presence: null),
     );
 
     expect(
@@ -98,7 +102,9 @@ void main() {
   testWidgets('pull to refresh reloads latest readings', (tester) async {
     final repository = _Repository(
       const Success(
-        LatestReadings(carbonDioxide: null, noise: null, presence: null),
+        LatestReadings(
+      areaId: 'area-1',
+      carbonDioxide: null, noise: null, presence: null),
       ),
     );
     await _pumpRepository(tester, repository);
@@ -189,7 +195,14 @@ class _Repository implements SafetyRepository {
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

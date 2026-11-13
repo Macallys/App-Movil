@@ -16,7 +16,7 @@ import 'package:safeplant_mobile/features/safety/presentation/providers/safety_p
 
 void main() {
   test('submit moves from initial to submitting to success', () async {
-    final pending = Completer<Result<ActuatorState>>();
+    final pending = Completer<Result<Unit>>();
     final repository = _Repository([pending.future]);
     final container = _container(repository);
     final controller = container.read(
@@ -36,12 +36,12 @@ void main() {
       container.read(actuatorOverrideControllerProvider),
       isA<ActuatorOverrideSubmitting>(),
     );
-    pending.complete(Success(_state(ActuatorRunState.off)));
+    pending.complete(const Success(Unit()));
     await submitting;
 
-    final state = container.read(
-      actuatorOverrideControllerProvider,
-    ) as ActuatorOverrideSuccess;
+    final state =
+        container.read(actuatorOverrideControllerProvider)
+            as ActuatorOverrideSuccess;
     expect(state.actuator.runState, ActuatorRunState.off);
     expect(state.actuator.mode, ActuatorMode.overridden);
   });
@@ -103,7 +103,7 @@ void main() {
   });
 
   test('a second submit while one is active is ignored', () async {
-    final pending = Completer<Result<ActuatorState>>();
+    final pending = Completer<Result<Unit>>();
     final repository = _Repository([pending.future]);
     final container = _container(repository);
     final controller = container.read(
@@ -119,7 +119,7 @@ void main() {
       type: ActuatorType.extractor,
       targetState: ActuatorRunState.on,
     );
-    pending.complete(Success(_state(ActuatorRunState.off)));
+    pending.complete(const Success(Unit()));
     await first;
     await second;
 
@@ -140,24 +140,15 @@ ProviderContainer _container(SafetyRepository repository) {
   return container;
 }
 
-ActuatorState _state(ActuatorRunState runState) {
-  return ActuatorState(
-    type: ActuatorType.extractor,
-    runState: runState,
-    mode: ActuatorMode.overridden,
-    lastChangedAt: DateTime.utc(2026, 5, 20, 16),
-  );
-}
-
 class _Repository implements SafetyRepository {
   _Repository(this.pending);
 
-  final List<Future<Result<ActuatorState>>> pending;
+  final List<Future<Result<Unit>>> pending;
   final targets = <ActuatorRunState>[];
   var calls = 0;
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
@@ -170,6 +161,13 @@ class _Repository implements SafetyRepository {
 
   @override
   Future<Result<List<AreaOperationalStatus>>> getOperationalStatus() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) {
     throw UnimplementedError();
   }
 
