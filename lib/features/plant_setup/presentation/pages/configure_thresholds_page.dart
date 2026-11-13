@@ -105,12 +105,12 @@ class _ConfigureThresholdsPageState
                 labelText: 'Límite de CO₂ (ppm)',
               ),
               keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-                signed: true,
+                decimal: false,
+                signed: false,
               ),
               textInputAction: TextInputAction.next,
               enabled: !loading,
-              validator: _validateLimit,
+              validator: _validateCo2,
             ),
             const SizedBox(height: AppSpacing.md),
             TextFormField(
@@ -119,12 +119,12 @@ class _ConfigureThresholdsPageState
                 labelText: 'Límite de ruido (dB)',
               ),
               keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-                signed: true,
+                decimal: false,
+                signed: false,
               ),
               textInputAction: TextInputAction.done,
               enabled: !loading,
-              validator: _validateLimit,
+              validator: _validateNoise,
             ),
             if (message != null) ...[
               const SizedBox(height: AppSpacing.md),
@@ -179,18 +179,30 @@ String _initial(num? value) {
   return value.toString();
 }
 
-String? _validateLimit(String? value) {
+String? _validateCo2(String? value) {
+  return _validateIntegerLimit(value, min: 1, max: 50000);
+}
+
+String? _validateNoise(String? value) {
+  return _validateIntegerLimit(value, min: 1, max: 140);
+}
+
+String? _validateIntegerLimit(String? value, {required int min, required int max}) {
   final raw = value?.trim() ?? '';
   if (raw.isEmpty) {
     return 'El valor es obligatorio';
   }
-  if (_parseLimit(raw) == null) {
+  final parsed = _parseLimit(raw);
+  if (parsed == null) {
+    return 'Los valores ingresados no son válidos.';
+  }
+  if (parsed < min || parsed > max) {
     return 'Los valores ingresados no son válidos.';
   }
   return null;
 }
 
-num? _parseLimit(String raw) {
+int? _parseLimit(String raw) {
   final trimmed = raw.trim();
   if (trimmed.isEmpty) {
     return null;
@@ -198,5 +210,9 @@ num? _parseLimit(String raw) {
   final normalized = trimmed.contains(',') && !trimmed.contains('.')
       ? trimmed.replaceAll(',', '.')
       : trimmed;
-  return num.tryParse(normalized);
+  final value = num.tryParse(normalized);
+  if (value == null || value != value.roundToDouble()) {
+    return null;
+  }
+  return value.toInt();
 }

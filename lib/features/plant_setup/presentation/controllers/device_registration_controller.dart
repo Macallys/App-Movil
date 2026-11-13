@@ -17,9 +17,13 @@ final class DeviceRegistrationAssociating extends DeviceRegistrationState {
 }
 
 final class DeviceRegistrationSuccess extends DeviceRegistrationState {
-  const DeviceRegistrationSuccess(this.association);
+  const DeviceRegistrationSuccess({
+    required this.association,
+    required this.secret,
+  });
 
   final DeviceAssociation association;
+  final String secret;
 }
 
 final class DeviceRegistrationAlreadyExists extends DeviceRegistrationState {
@@ -34,12 +38,14 @@ final class DeviceRegistrationAssociationFailed
     extends DeviceRegistrationState {
   const DeviceRegistrationAssociationFailed({
     required this.device,
+    required this.secret,
     required this.areaId,
     required this.deviceId,
     required this.kind,
   });
 
   final Device device;
+  final String secret;
   final String areaId;
   final String deviceId;
   final DeviceKind kind;
@@ -83,18 +89,18 @@ class DeviceRegistrationController extends Notifier<DeviceRegistrationState> {
           },
         );
     state = switch (result) {
-      RegisterDeviceSuccess(:final association) => DeviceRegistrationSuccess(
-        association,
-      ),
+      RegisterDeviceSuccess(:final association, :final secret) =>
+        DeviceRegistrationSuccess(association: association, secret: secret),
       RegisterDeviceIssueFailed(:final failure) => switch (failure) {
         ConflictFailure() => const DeviceRegistrationAlreadyExists(),
         NotFoundFailure() => const DeviceRegistrationAreaNotFound(),
         NetworkFailure() => const DeviceRegistrationNetworkError(),
         _ => const DeviceRegistrationFailure(),
       },
-      RegisterDeviceAssociationFailed(:final device) =>
+      RegisterDeviceAssociationFailed(:final device, :final secret) =>
         DeviceRegistrationAssociationFailed(
           device: device,
+          secret: secret,
           areaId: areaId,
           deviceId: deviceId,
           kind: kind,
@@ -116,7 +122,10 @@ class DeviceRegistrationController extends Notifier<DeviceRegistrationState> {
           kind: current.kind,
         );
     state = switch (result) {
-      Success(:final value) => DeviceRegistrationSuccess(value),
+      Success(:final value) => DeviceRegistrationSuccess(
+        association: value,
+        secret: current.secret,
+      ),
       FailureResult() => current,
     };
   }

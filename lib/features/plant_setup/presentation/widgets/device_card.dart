@@ -40,6 +40,12 @@ class DeviceCard extends StatelessWidget {
             Text('Vence: ${_format(device.expiresAt)}'),
             const SizedBox(height: AppSpacing.sm),
             Text(
+              device.lastSeenAt == null
+                  ? 'Última lectura: Sin datos'
+                  : 'Última lectura: ${_format(device.lastSeenAt!)}',
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
               _status(device, now),
               style: theme.textTheme.titleSmall?.copyWith(
                 color: _statusColor(device, now),

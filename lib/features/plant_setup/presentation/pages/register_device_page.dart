@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -64,10 +65,17 @@ class _RegisterDevicePageState extends ConsumerState<RegisterDevicePage> {
         (_retrying && state is DeviceRegistrationAssociating);
 
     if (state is DeviceRegistrationSuccess) {
-      return _RegisteredDevice(association: state.association);
+      return _RegisteredDevice(
+        association: state.association,
+        secret: state.secret,
+      );
     }
     if (associationPending) {
+      final secret = state is DeviceRegistrationAssociationFailed
+          ? state.secret
+          : null;
       return _AssociationPending(
+        secret: secret,
         retrying: state is DeviceRegistrationAssociating,
         onRetry: busy
             ? null
@@ -219,9 +227,10 @@ class _RegisterDeviceForm extends StatelessWidget {
 }
 
 class _RegisteredDevice extends StatelessWidget {
-  const _RegisteredDevice({required this.association});
+  const _RegisteredDevice({required this.association, required this.secret});
 
   final DeviceAssociation association;
+  final String secret;
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +250,8 @@ class _RegisteredDevice extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(kind),
         const SizedBox(height: AppSpacing.lg),
+        _SecretOncePanel(secret: secret),
+        const SizedBox(height: AppSpacing.lg),
         FilledButton(
           onPressed: () => context.pop(),
           child: const Text('Volver a la ficha'),
@@ -251,10 +262,15 @@ class _RegisteredDevice extends StatelessWidget {
 }
 
 class _AssociationPending extends StatelessWidget {
-  const _AssociationPending({required this.onRetry, required this.retrying});
+  const _AssociationPending({
+    required this.onRetry,
+    required this.retrying,
+    required this.secret,
+  });
 
   final VoidCallback? onRetry;
   final bool retrying;
+  final String? secret;
 
   @override
   Widget build(BuildContext context) {
@@ -265,6 +281,10 @@ class _AssociationPending extends StatelessWidget {
           'El dispositivo fue registrado, pero no pudo asociarse al área.',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
+        if (secret != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _SecretOncePanel(secret: secret!),
+        ],
         if (retrying) ...[
           const SizedBox(height: AppSpacing.md),
           const Text('Asociando al área...'),
@@ -275,6 +295,43 @@ class _AssociationPending extends StatelessWidget {
           child: retrying
               ? const SafePlantButtonProgress()
               : const Text('Reintentar asociación'),
+        ),
+      ],
+    );
+  }
+}
+
+class _SecretOncePanel extends StatelessWidget {
+  const _SecretOncePanel({required this.secret});
+
+  final String secret;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Secreto del aparato',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        const Text(
+          'Copiá o anotá este valor ahora. No se guarda en el teléfono y no se volverá a mostrar.',
+        ),
+        const SizedBox(height: AppSpacing.md),
+        SelectableText(secret, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: AppSpacing.md),
+        OutlinedButton(
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: secret));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Secreto copiado')),
+              );
+            }
+          },
+          child: const Text('Copiar secreto'),
         ),
       ],
     );
