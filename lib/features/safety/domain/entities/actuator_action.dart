@@ -2,16 +2,16 @@ import 'actuator_state.dart';
 
 final class ActuatorAction {
   const ActuatorAction({
-    required this.actionId,
+    required this.id,
     required this.areaId,
     required this.type,
-    required this.runState,
-    required this.executedAt,
+    required this.succeeded,
+    required this.recordedAt,
   });
 
-  final String actionId;
+  final String id;
   final String areaId;
   final ActuatorType type;
-  final ActuatorRunState runState;
-  final DateTime executedAt;
+  final bool succeeded;
+  final DateTime recordedAt;
 }

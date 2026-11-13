@@ -1,15 +1,15 @@
-import 'area_operational_status.dart';
-
 final class Exposure {
   const Exposure({
-    required this.exposureId,
+    required this.id,
     required this.areaId,
-    required this.severity,
-    required this.recordedAt,
+    required this.raisedAt,
+    this.withdrawnAt,
   });
 
-  final String exposureId;
+  final String id;
   final String areaId;
-  final ExposureSeverity severity;
-  final DateTime recordedAt;
+  final DateTime raisedAt;
+  final DateTime? withdrawnAt;
+
+  bool get isOpen => withdrawnAt == null;
 }

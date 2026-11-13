@@ -2,28 +2,32 @@ import 'iso_date_time.dart';
 
 class ActuatorActionDto {
   const ActuatorActionDto({
-    required this.actionId,
+    required this.id,
     required this.areaId,
     required this.type,
-    required this.runState,
-    required this.executedAt,
+    required this.succeeded,
+    required this.recordedAt,
   });
 
   factory ActuatorActionDto.fromJson(Map<String, dynamic> json) {
+    final succeeded = json['succeeded'];
+    if (succeeded is! bool) {
+      throw const FormatException('Unexpected succeeded');
+    }
     return ActuatorActionDto(
-      actionId: _requiredString(json, 'actionId'),
+      id: _requiredString(json, 'id'),
       areaId: _requiredString(json, 'areaId'),
       type: _requiredString(json, 'type'),
-      runState: _requiredString(json, 'runState'),
-      executedAt: parseIsoDateTime(json['executedAt'], 'executedAt'),
+      succeeded: succeeded,
+      recordedAt: parseIsoDateTime(json['recordedAt'], 'recordedAt'),
     );
   }
 
-  final String actionId;
+  final String id;
   final String areaId;
   final String type;
-  final String runState;
-  final DateTime executedAt;
+  final bool succeeded;
+  final DateTime recordedAt;
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

@@ -7,11 +7,11 @@ class ActuatorActionMapper {
 
   ActuatorAction toEntity(ActuatorActionDto dto) {
     return ActuatorAction(
-      actionId: dto.actionId,
+      id: dto.id,
       areaId: dto.areaId,
       type: actuatorTypeFromWire(dto.type),
-      runState: actuatorRunStateFromWire(dto.runState),
-      executedAt: dto.executedAt,
+      succeeded: dto.succeeded,
+      recordedAt: dto.recordedAt,
     );
   }
 }

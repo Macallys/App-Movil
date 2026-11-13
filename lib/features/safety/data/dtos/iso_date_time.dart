@@ -9,6 +9,13 @@ DateTime parseIsoDateTime(Object? value, String key) {
   return parsed;
 }
 
+DateTime? parseOptionalIsoDateTime(Map<String, dynamic> json, String key) {
+  if (!json.containsKey(key) || json[key] == null) {
+    return null;
+  }
+  return parseIsoDateTime(json[key], key);
+}
+
 final RegExp _iso8601 = RegExp(
   r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$',
 );

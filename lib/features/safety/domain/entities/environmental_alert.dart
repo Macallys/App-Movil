@@ -1,15 +1,15 @@
-import 'area_operational_status.dart';
-
 final class EnvironmentalAlert {
   const EnvironmentalAlert({
-    required this.alertId,
+    required this.id,
     required this.areaId,
-    required this.severity,
-    required this.recordedAt,
+    required this.raisedAt,
+    this.withdrawnAt,
   });
 
-  final String alertId;
+  final String id;
   final String areaId;
-  final ExposureSeverity severity;
-  final DateTime recordedAt;
+  final DateTime raisedAt;
+  final DateTime? withdrawnAt;
+
+  bool get isOpen => withdrawnAt == null;
 }

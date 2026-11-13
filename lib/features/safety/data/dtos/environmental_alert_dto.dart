@@ -2,25 +2,25 @@ import 'iso_date_time.dart';
 
 class EnvironmentalAlertDto {
   const EnvironmentalAlertDto({
-    required this.alertId,
+    required this.id,
     required this.areaId,
-    required this.severity,
-    required this.recordedAt,
+    required this.raisedAt,
+    this.withdrawnAt,
   });
 
   factory EnvironmentalAlertDto.fromJson(Map<String, dynamic> json) {
     return EnvironmentalAlertDto(
-      alertId: _requiredString(json, 'alertId'),
+      id: _requiredString(json, 'id'),
       areaId: _requiredString(json, 'areaId'),
-      severity: _requiredString(json, 'severity'),
-      recordedAt: parseIsoDateTime(json['recordedAt'], 'recordedAt'),
+      raisedAt: parseIsoDateTime(json['raisedAt'], 'raisedAt'),
+      withdrawnAt: parseOptionalIsoDateTime(json, 'withdrawnAt'),
     );
   }
 
-  final String alertId;
+  final String id;
   final String areaId;
-  final String severity;
-  final DateTime recordedAt;
+  final DateTime raisedAt;
+  final DateTime? withdrawnAt;
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

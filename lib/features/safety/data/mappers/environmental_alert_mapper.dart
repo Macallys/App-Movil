@@ -1,16 +1,15 @@
 import '../../domain/entities/environmental_alert.dart';
 import '../dtos/environmental_alert_dto.dart';
-import 'area_operational_status_mapper.dart';
 
 class EnvironmentalAlertMapper {
   const EnvironmentalAlertMapper();
 
   EnvironmentalAlert toEntity(EnvironmentalAlertDto dto) {
     return EnvironmentalAlert(
-      alertId: dto.alertId,
+      id: dto.id,
       areaId: dto.areaId,
-      severity: exposureSeverityFromWire(dto.severity),
-      recordedAt: dto.recordedAt,
+      raisedAt: dto.raisedAt,
+      withdrawnAt: dto.withdrawnAt,
     );
   }
 }
