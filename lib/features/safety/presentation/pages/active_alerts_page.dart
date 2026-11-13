@@ -84,11 +84,10 @@ class _ActiveAlertsPageState extends ConsumerState<ActiveAlertsPage>
     final areaId = widget.areaId;
     final filtered = [
       for (final alert in alerts)
-        if (areaId == null || alert.areaId == areaId) alert,
+        if (alert.isOpen && (areaId == null || alert.areaId == areaId)) alert,
     ];
-    // CLIENT-SIDE PRESENTATION DECISION.
-    // The available contract does not define an order.
-    filtered.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    // CLIENT-SIDE PRESENTATION DECISION: newest first.
+    filtered.sort((a, b) => b.raisedAt.compareTo(a.raisedAt));
     return filtered;
   }
 
@@ -152,7 +151,7 @@ class _AlertsList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: EnvironmentalAlertCard(
-              key: ValueKey(alert.alertId),
+              key: ValueKey(alert.id),
               alert: alert,
             ),
           );

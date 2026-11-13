@@ -62,7 +62,7 @@ class _ActuatorActionsPageState extends ConsumerState<ActuatorActionsPage> {
     final ordered = [...actions];
     // CLIENT-SIDE PRESENTATION DECISION.
     // The available contract does not define an order.
-    ordered.sort((a, b) => b.executedAt.compareTo(a.executedAt));
+    ordered.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
     return ordered;
   }
 
@@ -128,7 +128,7 @@ class _ActionsList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: ActuatorActionListItem(
-              key: ValueKey(action.actionId),
+              key: ValueKey(action.id),
               action: action,
             ),
           );

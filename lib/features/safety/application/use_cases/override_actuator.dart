@@ -8,7 +8,7 @@ class OverrideActuator {
 
   final SafetyRepository _repository;
 
-  Future<Result<ActuatorState>> call({
+  Future<Result<Unit>> call({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/actuator_action.dart';
-import '../../domain/entities/actuator_state.dart';
 import '../safety_labels.dart';
 
 class ActuatorActionListItem extends StatelessWidget {
@@ -22,22 +21,16 @@ class ActuatorActionListItem extends StatelessWidget {
             Text(actuatorTypeLabel(action.type)),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Estado: ${runStateLabel(action.runState)}',
-              style: TextStyle(color: _stateColor(action.runState)),
+              action.succeeded ? 'Resultado: Aplicado' : 'Resultado: Fallo',
+              style: TextStyle(
+                color: action.succeeded ? AppColors.green : AppColors.red,
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(formatStatusDate(action.executedAt)),
+            Text(formatStatusDate(action.recordedAt)),
           ],
         ),
       ),
     );
   }
-}
-
-Color _stateColor(ActuatorRunState state) {
-  return switch (state) {
-    ActuatorRunState.failed => AppColors.red,
-    ActuatorRunState.off || ActuatorRunState.retracted => AppColors.slate,
-    ActuatorRunState.on || ActuatorRunState.deployed => AppColors.green,
-  };
 }

@@ -24,12 +24,13 @@ ActuatorType actuatorTypeFromWire(String value) {
 }
 
 ActuatorRunState actuatorRunStateFromWire(String value) {
+  // Cloud.Api operational-status never emits Failed as runState.
+  // Publication failures appear in actuator-actions (succeeded: false).
   return switch (value) {
     'Off' => ActuatorRunState.off,
     'On' => ActuatorRunState.on,
     'Deployed' => ActuatorRunState.deployed,
     'Retracted' => ActuatorRunState.retracted,
-    'Failed' => ActuatorRunState.failed,
     _ => throw FormatException('Unknown actuator run state'),
   };
 }

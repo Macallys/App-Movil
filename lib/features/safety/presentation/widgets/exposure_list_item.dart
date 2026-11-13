@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/exposure.dart';
 import '../safety_labels.dart';
-import 'severity_label.dart';
 
 class ExposureListItem extends StatelessWidget {
   const ExposureListItem({required this.exposure, super.key});
@@ -20,9 +20,18 @@ class ExposureListItem extends StatelessWidget {
           children: [
             Text('Área: ${exposure.areaId}'),
             const SizedBox(height: AppSpacing.sm),
-            SeverityLabel(severity: exposure.severity),
+            Text(
+              exposure.isOpen ? 'Exposición abierta' : 'Exposición retirada',
+              style: TextStyle(
+                color: exposure.isOpen ? AppColors.amber : AppColors.slate,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            Text(formatStatusDate(exposure.recordedAt)),
+            Text('Inicio: ${formatStatusDate(exposure.raisedAt)}'),
+            if (exposure.withdrawnAt != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text('Retiro: ${formatStatusDate(exposure.withdrawnAt!)}'),
+            ],
           ],
         ),
       ),

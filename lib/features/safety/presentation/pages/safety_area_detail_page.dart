@@ -263,7 +263,7 @@ class _NoiseCard extends StatelessWidget {
     final value = reading;
     return _ReadingCard(
       title: 'Ruido',
-      value: value == null ? null : measureLabel(value.decibels, 'dB'),
+      value: value == null ? null : measureLabel(value.db, 'dB'),
       deviceId: value?.deviceId,
       recordedAt: value?.recordedAt,
     );

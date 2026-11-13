@@ -64,7 +64,7 @@ class _ShortExposureHistoryPageState
     final ordered = [...exposures];
     // CLIENT-SIDE PRESENTATION DECISION.
     // The available contract does not define an order.
-    ordered.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    ordered.sort((a, b) => b.raisedAt.compareTo(a.raisedAt));
     return ordered;
   }
 
@@ -130,7 +130,7 @@ class _HistoryList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: ExposureListItem(
-              key: ValueKey(exposure.exposureId),
+              key: ValueKey(exposure.id),
               exposure: exposure,
             ),
           );

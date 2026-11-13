@@ -77,7 +77,14 @@ class ActuatorOverrideController extends Notifier<ActuatorOverrideState> {
         return;
       }
       state = switch (result) {
-        Success(:final value) => ActuatorOverrideSuccess(value),
+        Success() => ActuatorOverrideSuccess(
+          ActuatorState(
+            type: type,
+            runState: targetState,
+            mode: ActuatorMode.overridden,
+            lastChangedAt: DateTime.now().toUtc(),
+          ),
+        ),
         FailureResult(:final failure) => switch (failure) {
           EdgeUnavailableFailure() => const ActuatorOverrideEdgeUnavailable(),
           ValidationFailure() => const ActuatorOverrideValidationError(),

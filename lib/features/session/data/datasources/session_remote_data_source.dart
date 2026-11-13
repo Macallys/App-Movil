@@ -38,7 +38,10 @@ class SessionRemoteDataSource {
   }
 
   Future<void> signOut() async {
-    await _client.post(_logoutPath, requiresBody: false);
+    final status = await _client.postStatus(_logoutPath, body: null);
+    if (status != 204) {
+      throw ApiException(message: 'Unexpected response', statusCode: status);
+    }
   }
 
   Future<void> requestCredentialRecovery({required String email}) async {
