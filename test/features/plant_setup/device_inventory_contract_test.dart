@@ -14,6 +14,7 @@ void main() {
         issuedAt: DateTime.utc(2026, 1, 1),
         expiresAt: DateTime.utc(2026, 2, 1),
         revokedAt: null,
+        lastSeenAt: null,
       ),
     );
 
@@ -39,6 +40,7 @@ void main() {
     expect(device.kind, DeviceKind.actuator);
     expect(device.revokedAt, DateTime.utc(2026, 3, 1, 12, 30));
     expect(device.isRevoked, isTrue);
+    expect(device.lastSeenAt, DateTime.utc(2026, 3, 2));
   });
 
   test('an unknown kind fails instead of becoming a sensor', () {
@@ -51,6 +53,7 @@ void main() {
           issuedAt: DateTime.utc(2026),
           expiresAt: DateTime.utc(2026, 2),
           revokedAt: null,
+          lastSeenAt: null,
         ),
       ),
       throwsFormatException,

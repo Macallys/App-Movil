@@ -5,6 +5,7 @@ import 'package:safeplant_mobile/features/plant_setup/application/use_cases/regi
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_setup.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_thresholds.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
@@ -25,7 +26,7 @@ void main() {
 
   test('issue and association success returns register success', () async {
     final repository = _Repository(
-      issueResult: Success(device),
+      issueResult: Success(IssuedDevice(device: device, secret: 'sec-1')),
       associationResult: const Success(association),
     );
 
@@ -52,7 +53,7 @@ void main() {
 
   test('association failure after issue is a partial failure', () async {
     final repository = _Repository(
-      issueResult: Success(device),
+      issueResult: Success(IssuedDevice(device: device, secret: 'sec-1')),
       associationResult: const FailureResult(NetworkFailure()),
     );
 
@@ -70,7 +71,7 @@ void main() {
 
   test('retry association does not issue the device again', () async {
     final repository = _Repository(
-      issueResult: Success(device),
+      issueResult: Success(IssuedDevice(device: device, secret: 'sec-1')),
       associationResult: const FailureResult(NetworkFailure()),
     );
     final useCase = RegisterDevice(repository);
@@ -96,13 +97,13 @@ void main() {
 class _Repository implements PlantSetupRepository {
   _Repository({required this.issueResult, required this.associationResult});
 
-  Result<Device> issueResult;
+  Result<IssuedDevice> issueResult;
   Result<DeviceAssociation> associationResult;
   var issueCalls = 0;
   var associateCalls = 0;
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,
@@ -123,6 +124,15 @@ class _Repository implements PlantSetupRepository {
 
   @override
   Future<Result<IndustrialArea>> createArea({
+    required String name,
+    required String location,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
     required String name,
     required String location,
   }) {

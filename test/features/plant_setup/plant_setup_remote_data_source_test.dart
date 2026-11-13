@@ -43,26 +43,90 @@ void main() {
     },
   );
 
-  test('area setup is not requested while its path stays open', () async {
+  test(
+    'update area puts name and location on the closed Cloud.Api path',
+    () async {
+      final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
+      final source = PlantSetupRemoteDataSource(
+        ApiClient(
+          dio: dio,
+          tokenStorage: MemoryTokenStorage()..accessToken = 'abc',
+        ),
+      );
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            expect(options.method, 'PUT');
+            expect(options.path, '/api/v1/areas/area-1');
+            expect(options.data, {'name': 'Horno 2', 'location': 'Nave B'});
+            expect(options.headers['Authorization'], 'Bearer abc');
+            handler.resolve(
+              Response<dynamic>(
+                requestOptions: options,
+                statusCode: 200,
+                data: {
+                  'id': 'area-1',
+                  'name': 'Horno 2',
+                  'location': 'Nave B',
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      final dto = await source.updateArea(
+        areaId: 'area-1',
+        name: 'Horno 2',
+        location: 'Nave B',
+      );
+
+      expect(dto.id, 'area-1');
+      expect(dto.name, 'Horno 2');
+      expect(dto.location, 'Nave B');
+    },
+  );
+
+  test('area setup gets the closed Cloud.Api path', () async {
     var calls = 0;
+    String? path;
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost'));
-    final source = PlantSetupRemoteDataSource(ApiClient(dio: dio));
+    final source = PlantSetupRemoteDataSource(
+      ApiClient(
+        dio: dio,
+        tokenStorage: MemoryTokenStorage()..accessToken = 'abc',
+      ),
+    );
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           calls += 1;
+          path = options.path;
           handler.resolve(
-            Response<dynamic>(requestOptions: options, statusCode: 200),
+            Response<dynamic>(
+              requestOptions: options,
+              statusCode: 200,
+              data: {
+                'id': 'area-1',
+                'name': 'Horno',
+                'location': 'Nave 1',
+                'co2LimitPpm': null,
+                'noiseLimitDb': 85,
+                'devices': <Map<String, dynamic>>[],
+              },
+            ),
           );
         },
       ),
     );
 
-    await expectLater(
-      source.getAreaSetup(areaId: 'area-1'),
-      throwsA(isA<UnimplementedError>()),
-    );
-    expect(calls, 0);
+    final dto = await source.getAreaSetup(areaId: 'area-1');
+
+    expect(calls, 1);
+    expect(path, '/api/v1/areas/area-1/setup');
+    expect(dto.id, 'area-1');
+    expect(dto.noiseLimitDb, 85);
+    expect(dto.devices, isEmpty);
   });
 
   test('configure thresholds puts both limits and the bearer token', () async {
@@ -152,6 +216,7 @@ void main() {
       );
 
       expect(dto.deviceId, 'dev-1');
+      expect(dto.secret, 'ignored');
     },
   );
 

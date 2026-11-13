@@ -15,6 +15,8 @@ class FakePlantSetupRemote extends PlantSetupRemoteDataSource {
   FakePlantSetupRemote({
     this.created,
     this.createError,
+    this.updated,
+    this.updateError,
     this.setup,
     this.setupError,
     this.thresholds,
@@ -31,6 +33,8 @@ class FakePlantSetupRemote extends PlantSetupRemoteDataSource {
 
   final IndustrialAreaDto? created;
   final ApiException? createError;
+  final IndustrialAreaDto? updated;
+  final ApiException? updateError;
   final AreaSetupDto? setup;
   final ApiException? setupError;
   final AreaThresholdsDto? thresholds;
@@ -54,6 +58,20 @@ class FakePlantSetupRemote extends PlantSetupRemoteDataSource {
       throw error;
     }
     return created!;
+  }
+
+  @override
+  Future<IndustrialAreaDto> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) async {
+    final error = updateError;
+    if (error != null) {
+      throw error;
+    }
+    return updated ??
+        IndustrialAreaDto(id: areaId, name: name, location: location);
   }
 
   @override

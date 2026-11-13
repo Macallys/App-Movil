@@ -9,6 +9,7 @@ import 'package:safeplant_mobile/features/plant_setup/application/use_cases/conf
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_setup.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_thresholds.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
@@ -32,10 +33,10 @@ void main() {
     expect(useCase.calls, 0);
   });
 
-  testWidgets('numeric values keep decimals', (tester) async {
+  testWidgets('decimal noise is rejected before submit', (tester) async {
     final useCase = _Counting(
       const Success(
-        AreaThresholds(areaId: 'area-1', co2LimitPpm: 800, noiseLimitDb: 85.5),
+        AreaThresholds(areaId: 'area-1', co2LimitPpm: 800, noiseLimitDb: 85),
       ),
     );
     await _pump(
@@ -49,12 +50,33 @@ void main() {
     await tester.tap(find.text('Guardar configuración'));
     await tester.pumpAndSettle();
 
+    expect(useCase.calls, 0);
+    expect(find.text('Los valores ingresados no son válidos.'), findsOneWidget);
+  });
+
+  testWidgets('integer values are submitted', (tester) async {
+    final useCase = _Counting(
+      const Success(
+        AreaThresholds(areaId: 'area-1', co2LimitPpm: 800, noiseLimitDb: 85),
+      ),
+    );
+    await _pump(
+      tester,
+      useCase,
+      const ConfigureThresholdsPage(areaId: 'area-1'),
+    );
+
+    await tester.enterText(find.byType(TextFormField).at(0), '800');
+    await tester.enterText(find.byType(TextFormField).at(1), '85');
+    await tester.tap(find.text('Guardar configuración'));
+    await tester.pumpAndSettle();
+
     expect(useCase.calls, 1);
     expect(useCase.areaId, 'area-1');
     expect(useCase.co2LimitPpm, 800);
-    expect(useCase.noiseLimitDb, 85.5);
+    expect(useCase.noiseLimitDb, 85);
     expect(find.text('Configuración guardada'), findsOneWidget);
-    expect(find.text('Ruido: 85.5 dB'), findsOneWidget);
+    expect(find.text('Ruido: 85 dB'), findsOneWidget);
   });
 
   testWidgets('current limits are prefilled', (tester) async {
@@ -64,12 +86,12 @@ void main() {
       const ConfigureThresholdsPage(
         areaId: 'area-1',
         co2LimitPpm: 800,
-        noiseLimitDb: 85.5,
+        noiseLimitDb: 85,
       ),
     );
 
     expect(_text(tester, 0), '800');
-    expect(_text(tester, 1), '85.5');
+    expect(_text(tester, 1), '85');
   });
 
   testWidgets('null limits leave the fields empty', (tester) async {
@@ -198,12 +220,21 @@ class _IdleRepository implements PlantSetupRepository {
   }
 
   @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Result<AreaSetup>> getAreaSetup({required String areaId}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,

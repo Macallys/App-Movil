@@ -31,14 +31,14 @@ void main() {
       'name': 'Horno',
       'location': 'Nave 1',
       'co2LimitPpm': 800,
-      'noiseLimitDb': 85.5,
+      'noiseLimitDb': 85,
       'devices': [
         {'id': 'row-1', 'deviceId': 'sensor-1', 'kind': 'Sensor'},
       ],
     });
 
     expect(dto.co2LimitPpm, 800);
-    expect(dto.noiseLimitDb, 85.5);
+    expect(dto.noiseLimitDb, 85);
     expect(dto.devices.single.deviceId, 'sensor-1');
     expect(dto.devices.single.kind, 'Sensor');
   });

@@ -9,6 +9,7 @@ import 'package:safeplant_mobile/features/plant_setup/application/use_cases/get_
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_setup.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_thresholds.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
@@ -189,6 +190,15 @@ class _IdleRepository implements PlantSetupRepository {
   }
 
   @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Result<AreaSetup>> getAreaSetup({required String areaId}) {
     throw UnimplementedError();
   }
@@ -203,7 +213,7 @@ class _IdleRepository implements PlantSetupRepository {
   }
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,

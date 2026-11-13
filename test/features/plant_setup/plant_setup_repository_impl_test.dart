@@ -21,6 +21,7 @@ import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dar
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 
 import 'support/fake_plant_setup_remote.dart';
 
@@ -66,6 +67,27 @@ void main() {
       (result as FailureResult<IndustrialArea>).failure,
       isA<ConflictFailure>(),
     );
+  });
+
+  test('200 update becomes an industrial area', () async {
+    final repository = _repository(
+      FakePlantSetupRemote(
+        updated: const IndustrialAreaDto(
+          id: 'area-1',
+          name: 'Horno 2',
+          location: 'Nave B',
+        ),
+      ),
+    );
+
+    final result = await repository.updateArea(
+      areaId: 'area-1',
+      name: 'Horno 2',
+      location: 'Nave B',
+    );
+
+    expect(result, isA<Success<IndustrialArea>>());
+    expect((result as Success<IndustrialArea>).value.name, 'Horno 2');
   });
 
   test('404 becomes NotFoundFailure', () async {
@@ -201,6 +223,7 @@ void main() {
           deviceId: 'dev-1',
           issuedAt: issuedAt,
           expiresAt: expiresAt,
+          secret: 'sec-1',
         ),
       ),
     );
@@ -211,10 +234,11 @@ void main() {
       kind: DeviceKind.sensor,
     );
 
-    final device = (result as Success<Device>).value;
-    expect(device.deviceId, 'dev-1');
-    expect(device.issuedAt, issuedAt);
-    expect(device.expiresAt, expiresAt);
+    final issued = (result as Success<IssuedDevice>).value;
+    expect(issued.device.deviceId, 'dev-1');
+    expect(issued.device.issuedAt, issuedAt);
+    expect(issued.device.expiresAt, expiresAt);
+    expect(issued.secret, 'sec-1');
   });
 
   test('409 device_already_exists becomes ConflictFailure', () async {
@@ -234,7 +258,7 @@ void main() {
       kind: DeviceKind.sensor,
     );
 
-    expect((result as FailureResult<Device>).failure, isA<ConflictFailure>());
+    expect((result as FailureResult<IssuedDevice>).failure, isA<ConflictFailure>());
   });
 
   test('422 area_not_found becomes NotFoundFailure', () async {
@@ -254,7 +278,7 @@ void main() {
       kind: DeviceKind.actuator,
     );
 
-    expect((result as FailureResult<Device>).failure, isA<NotFoundFailure>());
+    expect((result as FailureResult<IssuedDevice>).failure, isA<NotFoundFailure>());
   });
 
   test('an issue request without status becomes NetworkFailure', () async {
@@ -270,7 +294,7 @@ void main() {
       kind: DeviceKind.sensor,
     );
 
-    expect((result as FailureResult<Device>).failure, isA<NetworkFailure>());
+    expect((result as FailureResult<IssuedDevice>).failure, isA<NetworkFailure>());
   });
 
   test('201 association becomes a device association', () async {
@@ -312,6 +336,7 @@ void main() {
               issuedAt: issuedAt,
               expiresAt: expiresAt,
               revokedAt: null,
+              lastSeenAt: null,
             ),
           ],
         ),

@@ -35,7 +35,7 @@ void main() {
     expect(json['secret'], isNull);
   });
 
-  test('issue response parses the confirmed fields and ignores secret', () {
+  test('issue response parses secret once without putting it on Device', () {
     final dto = IssueDeviceResponseDto.fromJson({
       'deviceId': 'dev-1',
       'issuedAt': '2026-01-01T00:00:00Z',
@@ -43,10 +43,11 @@ void main() {
       'secret': 'not-a-field',
     });
 
-    final device = const DeviceMapper().toEntity(dto);
-    expect(device.deviceId, 'dev-1');
-    expect(device.issuedAt, DateTime.utc(2026, 1, 1));
-    expect(device.expiresAt, DateTime.utc(2026, 2, 1));
+    final issued = const DeviceMapper().toIssued(dto);
+    expect(issued.device.deviceId, 'dev-1');
+    expect(issued.device.issuedAt, DateTime.utc(2026, 1, 1));
+    expect(issued.device.expiresAt, DateTime.utc(2026, 2, 1));
+    expect(issued.secret, 'not-a-field');
   });
 
   test('Sensor and Actuator map to the domain kind', () {

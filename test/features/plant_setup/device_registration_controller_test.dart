@@ -7,6 +7,7 @@ import 'package:safeplant_mobile/core/error/result.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_setup.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_thresholds.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
@@ -43,7 +44,9 @@ void main() {
       isA<DeviceRegistrationIssuing>(),
     );
 
-    repository.issue.complete(Success(device));
+    repository.issue.complete(
+      Success(IssuedDevice(device: device, secret: 'sec-1')),
+    );
     await Future<void>.delayed(Duration.zero);
     expect(
       container.read(deviceRegistrationControllerProvider),
@@ -90,7 +93,9 @@ void main() {
     final pending = container
         .read(deviceRegistrationControllerProvider.notifier)
         .submit(deviceId: 'dev-1', areaId: 'area-1', kind: DeviceKind.sensor);
-    repository.issue.complete(Success(device));
+    repository.issue.complete(
+      Success(IssuedDevice(device: device, secret: 'sec-1')),
+    );
     await Future<void>.delayed(Duration.zero);
     repository.associate.complete(const FailureResult(NetworkFailure()));
     await pending;
@@ -127,14 +132,14 @@ ProviderContainer _container(_Repository repository) {
 }
 
 class _Repository implements PlantSetupRepository {
-  Completer<Result<Device>> issue = Completer<Result<Device>>();
+  Completer<Result<IssuedDevice>> issue = Completer<Result<IssuedDevice>>();
   Completer<Result<DeviceAssociation>> associate =
       Completer<Result<DeviceAssociation>>();
   var issueCalls = 0;
   var associateCalls = 0;
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,
@@ -155,6 +160,15 @@ class _Repository implements PlantSetupRepository {
 
   @override
   Future<Result<IndustrialArea>> createArea({
+    required String name,
+    required String location,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
     required String name,
     required String location,
   }) {

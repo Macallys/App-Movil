@@ -3,9 +3,11 @@ import 'package:safeplant_mobile/core/error/failure.dart';
 import 'package:safeplant_mobile/core/error/result.dart';
 import 'package:safeplant_mobile/features/plant_setup/application/use_cases/create_area.dart';
 import 'package:safeplant_mobile/features/plant_setup/application/use_cases/get_area_setup.dart';
+import 'package:safeplant_mobile/features/plant_setup/application/use_cases/update_area.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_setup.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/area_thresholds.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device.dart';
+import 'package:safeplant_mobile/features/plant_setup/domain/entities/issued_device.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_revocation.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/device_association.dart';
 import 'package:safeplant_mobile/features/plant_setup/domain/entities/industrial_area.dart';
@@ -49,6 +51,32 @@ void main() {
     );
   });
 
+  test('UpdateArea forwards area id, name and location', () async {
+    final repository = _Repository(
+      updateResult: const Success(
+        IndustrialArea(id: 'area-1', name: 'Horno 2', location: 'Nave B'),
+      ),
+    );
+
+    final result = await UpdateArea(repository).call(
+      areaId: 'area-1',
+      name: 'Horno 2',
+      location: 'Nave B',
+    );
+
+    expect(repository.updatedAreaId, 'area-1');
+    expect(repository.updatedName, 'Horno 2');
+    expect(repository.updatedLocation, 'Nave B');
+    expect(
+      result,
+      isA<Success<IndustrialArea>>().having(
+        (value) => value.value.name,
+        'name',
+        'Horno 2',
+      ),
+    );
+  });
+
   test('GetAreaSetup uses the requested area id', () async {
     final repository = _Repository(setup: _setup());
 
@@ -84,13 +112,22 @@ AreaSetup _setup() {
 }
 
 class _Repository implements PlantSetupRepository {
-  _Repository({this.createResult, this.setup, this.setupFailure});
+  _Repository({
+    this.createResult,
+    this.updateResult,
+    this.setup,
+    this.setupFailure,
+  });
 
   final Result<IndustrialArea>? createResult;
+  final Result<IndustrialArea>? updateResult;
   final AreaSetup? setup;
   final Failure? setupFailure;
   String? createdName;
   String? createdLocation;
+  String? updatedAreaId;
+  String? updatedName;
+  String? updatedLocation;
   String? requestedAreaId;
 
   @override
@@ -102,6 +139,19 @@ class _Repository implements PlantSetupRepository {
     createdLocation = location;
     return createResult!;
   }
+
+  @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) async {
+    updatedAreaId = areaId;
+    updatedName = name;
+    updatedLocation = location;
+    return updateResult!;
+  }
+
 
   @override
   Future<Result<AreaSetup>> getAreaSetup({required String areaId}) async {
@@ -122,7 +172,7 @@ class _Repository implements PlantSetupRepository {
   }
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,
