@@ -8,19 +8,19 @@ final class CarbonDioxideReading {
   });
 
   final String deviceId;
-  final num ppm;
+  final int ppm;
   final DateTime recordedAt;
 }
 
 final class NoiseReading {
   const NoiseReading({
     required this.deviceId,
-    required this.decibels,
+    required this.db,
     required this.recordedAt,
   });
 
   final String deviceId;
-  final num decibels;
+  final int db;
   final DateTime recordedAt;
 }
 
@@ -38,11 +38,13 @@ final class PresenceReading {
 
 final class LatestReadings {
   const LatestReadings({
+    required this.areaId,
     required this.carbonDioxide,
     required this.noise,
     required this.presence,
   });
 
+  final String areaId;
   final CarbonDioxideReading? carbonDioxide;
   final NoiseReading? noise;
   final PresenceReading? presence;

@@ -9,18 +9,18 @@ class CarbonDioxideReadingDto {
 
   factory CarbonDioxideReadingDto.fromJson(Map<String, dynamic> json) {
     final ppm = json['ppm'];
-    if (ppm is! num) {
+    if (ppm is! num || ppm != ppm.roundToDouble()) {
       throw const FormatException('Unexpected ppm');
     }
     return CarbonDioxideReadingDto(
       deviceId: _deviceId(json),
-      ppm: ppm,
+      ppm: ppm.toInt(),
       recordedAt: parseIsoDateTime(json['recordedAt'], 'recordedAt'),
     );
   }
 
   final String deviceId;
-  final num ppm;
+  final int ppm;
   final DateTime recordedAt;
 }
 

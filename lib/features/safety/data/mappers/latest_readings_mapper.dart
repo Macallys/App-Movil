@@ -10,6 +10,7 @@ class LatestReadingsMapper {
 
   LatestReadings toEntity(LatestReadingsDto dto) {
     return LatestReadings(
+      areaId: dto.areaId,
       carbonDioxide: dto.carbonDioxide == null
           ? null
           : _carbonDioxide(dto.carbonDioxide!),
@@ -29,7 +30,7 @@ class LatestReadingsMapper {
   NoiseReading _noise(NoiseReadingDto dto) {
     return NoiseReading(
       deviceId: dto.deviceId,
-      decibels: dto.decibels,
+      db: dto.db,
       recordedAt: dto.recordedAt,
     );
   }

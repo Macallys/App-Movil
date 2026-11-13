@@ -9,6 +9,10 @@ import '../entities/latest_readings.dart';
 abstract class SafetyRepository {
   Future<Result<List<AreaOperationalStatus>>> getOperationalStatus();
 
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  });
+
   Future<Result<LatestReadings>> getLatestReadings({required String areaId});
 
   Future<Result<List<EnvironmentalAlert>>> getActiveAlerts();
@@ -21,7 +25,7 @@ abstract class SafetyRepository {
     required String areaId,
   });
 
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,

@@ -4,13 +4,19 @@ import 'presence_reading_dto.dart';
 
 class LatestReadingsDto {
   const LatestReadingsDto({
+    required this.areaId,
     required this.carbonDioxide,
     required this.noise,
     required this.presence,
   });
 
   factory LatestReadingsDto.fromJson(Map<String, dynamic> json) {
+    final areaId = json['areaId'];
+    if (areaId is! String || areaId.isEmpty) {
+      throw const FormatException('Unexpected areaId');
+    }
     return LatestReadingsDto(
+      areaId: areaId,
       carbonDioxide: _object(
         json,
         'carbonDioxide',
@@ -21,6 +27,7 @@ class LatestReadingsDto {
     );
   }
 
+  final String areaId;
   final CarbonDioxideReadingDto? carbonDioxide;
   final NoiseReadingDto? noise;
   final PresenceReadingDto? presence;

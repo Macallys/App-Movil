@@ -45,7 +45,22 @@ class SafetyRepositoryImpl implements SafetyRepository {
       return FailureResult(_map(error));
     } on FormatException {
       return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
+    }
+  }
+
+  @override
+  Future<Result<AreaOperationalStatus>> getAreaOperationalStatus({
+    required String areaId,
+  }) async {
+    try {
+      final dto = await remote.getAreaOperationalStatus(areaId: areaId);
+      return Success(statusMapper.toEntity(dto));
+    } on ApiException catch (error) {
+      if (error.statusCode == 404 || error.code == 'area_not_found') {
+        return const FailureResult(NotFoundFailure());
+      }
+      return FailureResult(_map(error));
+    } on FormatException {
       return const FailureResult(UnknownFailure());
     }
   }
@@ -64,8 +79,6 @@ class SafetyRepositoryImpl implements SafetyRepository {
       return FailureResult(_map(error));
     } on FormatException {
       return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
-      return const FailureResult(UnknownFailure());
     }
   }
 
@@ -79,8 +92,6 @@ class SafetyRepositoryImpl implements SafetyRepository {
     } on ApiException catch (error) {
       return FailureResult(_map(error));
     } on FormatException {
-      return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
       return const FailureResult(UnknownFailure());
     }
   }
@@ -98,8 +109,6 @@ class SafetyRepositoryImpl implements SafetyRepository {
       return FailureResult(_map(error));
     } on FormatException {
       return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
-      return const FailureResult(UnknownFailure());
     }
   }
 
@@ -116,31 +125,27 @@ class SafetyRepositoryImpl implements SafetyRepository {
       return FailureResult(_map(error));
     } on FormatException {
       return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
-      return const FailureResult(UnknownFailure());
     }
   }
 
   @override
-  Future<Result<ActuatorState>> overrideActuator({
+  Future<Result<Unit>> overrideActuator({
     required String areaId,
     required ActuatorType type,
     required ActuatorRunState targetState,
   }) async {
     try {
-      final dto = await remote.overrideActuator(
+      await remote.overrideActuator(
         areaId: areaId,
         request: OverrideActuatorRequestDto(
-          type: actuatorTypeToWire(type),
+          actuatorType: actuatorTypeToWire(type),
           runState: actuatorRunStateToWire(targetState),
         ),
       );
-      return Success(const ActuatorStateMapper().toEntity(dto));
+      return const Success(Unit());
     } on ApiException catch (error) {
       return FailureResult(_mapOverride(error));
     } on FormatException {
-      return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
       return const FailureResult(UnknownFailure());
     }
   }
@@ -154,6 +159,12 @@ class SafetyRepositoryImpl implements SafetyRepository {
     }
     if (error.statusCode == 403 && error.code == 'role_not_allowed') {
       return const ForbiddenFailure();
+    }
+    if (error.statusCode == 404 || error.code == 'area_not_found') {
+      return const NotFoundFailure();
+    }
+    if (error.statusCode == 400 && error.code == 'invalid_action') {
+      return const ValidationFailure();
     }
     if (error.statusCode == 503 && error.code == 'edge_unreachable') {
       return const EdgeUnavailableFailure();
