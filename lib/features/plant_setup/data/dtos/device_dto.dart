@@ -8,6 +8,7 @@ class DeviceDto {
     required this.issuedAt,
     required this.expiresAt,
     required this.revokedAt,
+    required this.lastSeenAt,
   });
 
   factory DeviceDto.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class DeviceDto {
       issuedAt: parseIsoDateTime(json['issuedAt'], 'issuedAt'),
       expiresAt: parseIsoDateTime(json['expiresAt'], 'expiresAt'),
       revokedAt: parseOptionalIsoDateTime(json, 'revokedAt'),
+      lastSeenAt: parseOptionalIsoDateTime(json, 'lastSeenAt'),
     );
   }
 
@@ -27,6 +29,7 @@ class DeviceDto {
   final DateTime issuedAt;
   final DateTime expiresAt;
   final DateTime? revokedAt;
+  final DateTime? lastSeenAt;
 }
 
 String _string(Map<String, dynamic> json, String key) {

@@ -3,6 +3,7 @@ import '../../../../core/error/result.dart';
 import '../../domain/entities/area_setup.dart';
 import '../../domain/entities/device.dart';
 import '../../domain/entities/device_association.dart';
+import '../../domain/entities/issued_device.dart';
 import '../../domain/repositories/plant_setup_repository.dart';
 
 enum RegisterDevicePhase { issuing, associating }
@@ -15,10 +16,12 @@ final class RegisterDeviceSuccess extends RegisterDeviceResult {
   const RegisterDeviceSuccess({
     required this.device,
     required this.association,
+    required this.secret,
   });
 
   final Device device;
   final DeviceAssociation association;
+  final String secret;
 }
 
 final class RegisterDeviceIssueFailed extends RegisterDeviceResult {
@@ -30,10 +33,12 @@ final class RegisterDeviceIssueFailed extends RegisterDeviceResult {
 final class RegisterDeviceAssociationFailed extends RegisterDeviceResult {
   const RegisterDeviceAssociationFailed({
     required this.device,
+    required this.secret,
     required this.failure,
   });
 
   final Device device;
+  final String secret;
   final Failure failure;
 }
 
@@ -57,7 +62,7 @@ class RegisterDevice {
     if (issued case FailureResult(:final failure)) {
       return RegisterDeviceIssueFailed(failure);
     }
-    final device = (issued as Success<Device>).value;
+    final credential = (issued as Success<IssuedDevice>).value;
     onPhase?.call(RegisterDevicePhase.associating);
     final associated = await associate(
       areaId: areaId,
@@ -66,11 +71,13 @@ class RegisterDevice {
     );
     return switch (associated) {
       Success(:final value) => RegisterDeviceSuccess(
-        device: device,
+        device: credential.device,
         association: value,
+        secret: credential.secret,
       ),
       FailureResult(:final failure) => RegisterDeviceAssociationFailed(
-        device: device,
+        device: credential.device,
+        secret: credential.secret,
         failure: failure,
       ),
     };

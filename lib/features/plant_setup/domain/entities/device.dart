@@ -8,6 +8,7 @@ final class Device {
     this.areaId,
     this.kind,
     this.revokedAt,
+    this.lastSeenAt,
   });
 
   final String deviceId;
@@ -16,6 +17,7 @@ final class Device {
   final DateTime issuedAt;
   final DateTime expiresAt;
   final DateTime? revokedAt;
+  final DateTime? lastSeenAt;
 
   bool get isRevoked => revokedAt != null;
 
@@ -27,6 +29,7 @@ final class Device {
       issuedAt: issuedAt,
       expiresAt: expiresAt,
       revokedAt: revokedAt,
+      lastSeenAt: lastSeenAt,
     );
   }
 }

@@ -1,5 +1,6 @@
 import '../../domain/entities/device.dart';
 import '../../domain/entities/device_revocation.dart';
+import '../../domain/entities/issued_device.dart';
 import '../dtos/device_dto.dart';
 import '../dtos/issue_device_response_dto.dart';
 import '../dtos/revoke_device_response_dto.dart';
@@ -8,11 +9,14 @@ import 'device_kind_mapper.dart';
 class DeviceMapper {
   const DeviceMapper();
 
-  Device toEntity(IssueDeviceResponseDto dto) {
-    return Device(
-      deviceId: dto.deviceId,
-      issuedAt: dto.issuedAt,
-      expiresAt: dto.expiresAt,
+  IssuedDevice toIssued(IssueDeviceResponseDto dto) {
+    return IssuedDevice(
+      device: Device(
+        deviceId: dto.deviceId,
+        issuedAt: dto.issuedAt,
+        expiresAt: dto.expiresAt,
+      ),
+      secret: dto.secret,
     );
   }
 
@@ -24,6 +28,7 @@ class DeviceMapper {
       issuedAt: dto.issuedAt,
       expiresAt: dto.expiresAt,
       revokedAt: dto.revokedAt,
+      lastSeenAt: dto.lastSeenAt,
     );
   }
 

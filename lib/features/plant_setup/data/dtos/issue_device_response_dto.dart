@@ -3,6 +3,7 @@ class IssueDeviceResponseDto {
     required this.deviceId,
     required this.issuedAt,
     required this.expiresAt,
+    required this.secret,
   });
 
   factory IssueDeviceResponseDto.fromJson(Map<String, dynamic> json) {
@@ -10,12 +11,14 @@ class IssueDeviceResponseDto {
       deviceId: _string(json, 'deviceId'),
       issuedAt: _dateTime(json, 'issuedAt'),
       expiresAt: _dateTime(json, 'expiresAt'),
+      secret: _string(json, 'secret'),
     );
   }
 
   final String deviceId;
   final DateTime issuedAt;
   final DateTime expiresAt;
+  final String secret;
 }
 
 String _string(Map<String, dynamic> json, String key) {
