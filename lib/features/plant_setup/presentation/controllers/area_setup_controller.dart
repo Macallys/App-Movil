@@ -54,6 +54,23 @@ class AreaSetupController extends Notifier<AreaSetupState> {
     };
   }
 
+  void applyIdentity({required String name, required String location}) {
+    final current = state;
+    if (current is! AreaSetupData) {
+      return;
+    }
+    state = AreaSetupData(
+      AreaSetup(
+        id: current.setup.id,
+        name: name,
+        location: location,
+        co2LimitPpm: current.setup.co2LimitPpm,
+        noiseLimitDb: current.setup.noiseLimitDb,
+        devices: current.setup.devices,
+      ),
+    );
+  }
+
   void applyThresholds(AreaThresholds thresholds) {
     final current = state;
     if (current is! AreaSetupData || current.setup.id != thresholds.areaId) {

@@ -9,6 +9,7 @@ import '../../application/use_cases/get_area_setup.dart';
 import '../../application/use_cases/list_devices.dart';
 import '../../application/use_cases/register_device.dart';
 import '../../application/use_cases/revoke_device.dart';
+import '../../application/use_cases/update_area.dart';
 import '../../data/datasources/plant_setup_remote_data_source.dart';
 import '../../data/mappers/area_setup_mapper.dart';
 import '../../data/mappers/area_thresholds_mapper.dart';
@@ -28,6 +29,7 @@ part '../controllers/configure_thresholds_controller.dart';
 part '../controllers/device_inventory_controller.dart';
 part '../controllers/device_registration_controller.dart';
 part '../controllers/industrial_area_controller.dart';
+part '../controllers/update_area_controller.dart';
 
 final plantSetupRemoteDataSourceProvider = Provider<PlantSetupRemoteDataSource>(
   (ref) {
@@ -48,6 +50,10 @@ final plantSetupRepositoryProvider = Provider<PlantSetupRepository>((ref) {
 
 final createAreaUseCaseProvider = Provider<CreateArea>((ref) {
   return CreateArea(ref.watch(plantSetupRepositoryProvider));
+});
+
+final updateAreaUseCaseProvider = Provider<UpdateArea>((ref) {
+  return UpdateArea(ref.watch(plantSetupRepositoryProvider));
 });
 
 final getAreaSetupUseCaseProvider = Provider<GetAreaSetup>((ref) {
@@ -73,6 +79,11 @@ final revokeDeviceUseCaseProvider = Provider<RevokeDevice>((ref) {
 final industrialAreaControllerProvider =
     NotifierProvider<IndustrialAreaController, CreateAreaState>(
       IndustrialAreaController.new,
+    );
+
+final updateAreaControllerProvider =
+    NotifierProvider<UpdateAreaController, UpdateAreaState>(
+      UpdateAreaController.new,
     );
 
 final areaSetupControllerProvider =

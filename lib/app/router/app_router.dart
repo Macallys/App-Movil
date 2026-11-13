@@ -6,6 +6,7 @@ import '../../features/plant_setup/presentation/pages/area_setup_page.dart';
 import '../../features/plant_setup/presentation/pages/configure_thresholds_page.dart';
 import '../../features/plant_setup/presentation/pages/create_area_page.dart';
 import '../../features/plant_setup/presentation/pages/device_inventory_page.dart';
+import '../../features/plant_setup/presentation/pages/edit_area_page.dart';
 import '../../features/plant_setup/presentation/pages/plant_setup_home_page.dart';
 import '../../features/plant_setup/presentation/pages/register_device_page.dart';
 import '../../features/safety/domain/entities/area_operational_status.dart';
@@ -177,6 +178,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 noiseLimitDb: _optionalNum(
                   state.uri.queryParameters['noiseLimitDb'],
                 ),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/app/setup/areas/:areaId/edit',
+            builder: (context, state) {
+              return EditAreaPage(
+                areaId: state.pathParameters['areaId']!,
+                initialName: state.uri.queryParameters['name'] ?? '',
+                initialLocation: state.uri.queryParameters['location'] ?? '',
               );
             },
           ),

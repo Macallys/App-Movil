@@ -69,6 +69,19 @@ class _AreaSetupBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(setup.location, style: textTheme.bodyLarge),
         const SizedBox(height: AppSpacing.lg),
+        OutlinedButton(
+          onPressed: () {
+            context.push(
+              RouteNames.editArea(
+                setup.id,
+                name: setup.name,
+                location: setup.location,
+              ),
+            );
+          },
+          child: const Text('Editar nombre y ubicación'),
+        ),
+        const SizedBox(height: AppSpacing.lg),
         Text('Límite de CO₂', style: textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         Text(_co2(setup.co2LimitPpm)),

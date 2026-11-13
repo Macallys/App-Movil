@@ -28,6 +28,17 @@ abstract final class RouteNames {
 
   static String areaSetup(String areaId) => '/app/setup/areas/$areaId';
 
+  static String editArea(
+    String areaId, {
+    required String name,
+    required String location,
+  }) {
+    return Uri(
+      path: '/app/setup/areas/${Uri.encodeComponent(areaId)}/edit',
+      queryParameters: {'name': name, 'location': location},
+    ).toString();
+  }
+
   static String configureThresholds(
     String areaId, {
     num? co2LimitPpm,
