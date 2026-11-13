@@ -5,9 +5,16 @@ import '../entities/device.dart';
 import '../entities/device_association.dart';
 import '../entities/device_revocation.dart';
 import '../entities/industrial_area.dart';
+import '../entities/issued_device.dart';
 
 abstract class PlantSetupRepository {
   Future<Result<IndustrialArea>> createArea({
+    required String name,
+    required String location,
+  });
+
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
     required String name,
     required String location,
   });
@@ -20,7 +27,7 @@ abstract class PlantSetupRepository {
     required num noiseLimitDb,
   });
 
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,

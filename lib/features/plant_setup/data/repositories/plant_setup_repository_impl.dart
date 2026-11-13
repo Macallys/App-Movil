@@ -7,6 +7,7 @@ import '../../domain/entities/device.dart';
 import '../../domain/entities/device_association.dart';
 import '../../domain/entities/device_revocation.dart';
 import '../../domain/entities/industrial_area.dart';
+import '../../domain/entities/issued_device.dart';
 import '../../domain/repositories/plant_setup_repository.dart';
 import '../datasources/plant_setup_remote_data_source.dart';
 import '../mappers/area_setup_mapper.dart';
@@ -48,6 +49,26 @@ class PlantSetupRepositoryImpl implements PlantSetupRepository {
   }
 
   @override
+  Future<Result<IndustrialArea>> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) async {
+    try {
+      final dto = await remote.updateArea(
+        areaId: areaId,
+        name: name,
+        location: location,
+      );
+      return Success(areaMapper.toEntity(dto));
+    } on ApiException catch (error) {
+      return FailureResult(_map(error));
+    } on FormatException {
+      return const FailureResult(UnknownFailure());
+    }
+  }
+
+  @override
   Future<Result<AreaSetup>> getAreaSetup({required String areaId}) async {
     try {
       final dto = await remote.getAreaSetup(areaId: areaId);
@@ -55,8 +76,6 @@ class PlantSetupRepositoryImpl implements PlantSetupRepository {
     } on ApiException catch (error) {
       return FailureResult(_map(error));
     } on FormatException {
-      return const FailureResult(UnknownFailure());
-    } on UnimplementedError {
       return const FailureResult(UnknownFailure());
     }
   }
@@ -82,7 +101,7 @@ class PlantSetupRepositoryImpl implements PlantSetupRepository {
   }
 
   @override
-  Future<Result<Device>> issueDevice({
+  Future<Result<IssuedDevice>> issueDevice({
     required String deviceId,
     required String areaId,
     required DeviceKind kind,
@@ -93,7 +112,7 @@ class PlantSetupRepositoryImpl implements PlantSetupRepository {
         areaId: areaId,
         kind: kind,
       );
-      return Success(deviceMapper.toEntity(dto));
+      return Success(deviceMapper.toIssued(dto));
     } on ApiException catch (error) {
       return FailureResult(_map(error));
     } on FormatException {

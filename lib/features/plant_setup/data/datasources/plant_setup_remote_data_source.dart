@@ -38,6 +38,24 @@ class PlantSetupRemoteDataSource {
     return IndustrialAreaDto.fromJson(response.body);
   }
 
+  Future<IndustrialAreaDto> updateArea({
+    required String areaId,
+    required String name,
+    required String location,
+  }) async {
+    final response = await _client.putJson(
+      '/api/v1/areas/${Uri.encodeComponent(areaId)}',
+      body: CreateAreaRequestDto(name: name, location: location).toJson(),
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(
+        message: 'Unexpected response',
+        statusCode: response.statusCode,
+      );
+    }
+    return IndustrialAreaDto.fromJson(response.body);
+  }
+
   Future<AreaThresholdsDto> configureEnvironmentalThresholds({
     required String areaId,
     required num co2LimitPpm,
@@ -128,8 +146,16 @@ class PlantSetupRemoteDataSource {
     return RevokeDeviceResponseDto.fromJson(response.body);
   }
 
-  Future<AreaSetupDto> getAreaSetup({required String areaId}) {
-    // TODO: Pending API/domain contract decision.
-    return Future<AreaSetupDto>.error(UnimplementedError(areaId));
+  Future<AreaSetupDto> getAreaSetup({required String areaId}) async {
+    final response = await _client.getJson(
+      '/api/v1/areas/${Uri.encodeComponent(areaId)}/setup',
+    );
+    if (response.statusCode != 200) {
+      throw ApiException(
+        message: 'Unexpected response',
+        statusCode: response.statusCode,
+      );
+    }
+    return AreaSetupDto.fromJson(response.body);
   }
 }

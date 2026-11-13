@@ -42,8 +42,8 @@ class AreaSetupDto {
   final String id;
   final String name;
   final String location;
-  final num? co2LimitPpm;
-  final num? noiseLimitDb;
+  final int? co2LimitPpm;
+  final int? noiseLimitDb;
   final List<AreaDeviceDto> devices;
 }
 
@@ -55,7 +55,7 @@ String _requiredString(Map<String, dynamic> json, String key) {
   throw FormatException('Unexpected $key');
 }
 
-num? _optionalNumber(Map<String, dynamic> json, String key) {
+int? _optionalNumber(Map<String, dynamic> json, String key) {
   if (!json.containsKey(key)) {
     throw FormatException('Missing $key');
   }
@@ -63,8 +63,11 @@ num? _optionalNumber(Map<String, dynamic> json, String key) {
   if (value == null) {
     return null;
   }
-  if (value is num) {
+  if (value is int) {
     return value;
+  }
+  if (value is num && value == value.roundToDouble()) {
+    return value.toInt();
   }
   throw FormatException('Unexpected $key');
 }
