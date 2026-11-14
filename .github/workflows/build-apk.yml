@@ -1,0 +1,72 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: safeplant-android-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      API_BASE_URL: ${{ vars.API_BASE_URL || 'https://wa-safeplant-cloudbackend-prod.azurewebsites.net' }}
+      APK_PATH: build/app/outputs/flutter-apk/app-release.apk
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Run Flutter tests
+        run: flutter test --no-pub
+
+      - name: Build Android release APK
+        run: flutter build apk --release --no-pub --dart-define="API_BASE_URL=$API_BASE_URL"
+
+      - name: Upload APK as a workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: safeplant-android-release
+          path: ${{ env.APK_PATH }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Publish version from pubspec.yaml
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -nE 's/^version: ([0-9]+\.[0-9]+\.[0-9]+)\+[0-9]+$/\1/p' pubspec.yaml)
+          if [[ -z "$version" ]]; then
+            echo "::error::Expected a version in the form major.minor.patch+build in pubspec.yaml."
+            exit 1
+          fi
+          tag="v$version"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$tag is already published. Increment the version to publish another release."
+            exit 0
+          fi
+          gh release create "$tag" "$APK_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "SafePlant Mobile $tag" \
+            --notes "APK Android de SafePlant Supervisor para la revisión académica. Compilado en modo release con la firma de depuración del proyecto."
